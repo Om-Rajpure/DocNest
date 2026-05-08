@@ -1,6 +1,6 @@
 /* ============================================================
    SIDEBAR — DocNest (BEM)
-   Modern Light Enterprise Theme
+   Dark Navy Enterprise Theme
    ============================================================ */
 
 /* ---------- Layout shell ---------- */
@@ -8,7 +8,7 @@
   width: 260px;
   min-width: 260px;
   height: 100vh;
-  background-color: #FFFFFF;
+  background-color: #0F1729;
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -18,7 +18,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   transition: transform 250ms ease;
-  border-right: 1px solid #E2E8F0;
+  border-right: 1px solid rgba(255,255,255,0.06);
 }
 
 /* ---------- Logo ---------- */
@@ -28,7 +28,7 @@
   align-items: center;
   gap: 10px;
   padding: 20px 16px;
-  border-bottom: 1px solid #E2E8F0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
   flex-shrink: 0;
 }
 
@@ -36,23 +36,23 @@
   width: 36px;
   height: 36px;
   min-width: 36px;
-  background: linear-gradient(135deg, #4F46E5, #7C3AED);
+  background: linear-gradient(135deg, #2563EB, #0EA5E9);
   border-radius: 10px;
   color: #ffffff;
   font-weight: 700;
   font-size: 18px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Bricolage Grotesque', sans-serif;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
 }
 
 .sidebar__logo-text {
-  color: #0F172A;
+  color: #FFFFFF;
   font-size: 17px;
   font-weight: 700;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Bricolage Grotesque', sans-serif;
   letter-spacing: -0.3px;
   flex: 1;
 }
@@ -61,7 +61,7 @@
   display: none;
   background: none;
   border: none;
-  color: #94A3B8;
+  color: #64748B;
   cursor: pointer;
   padding: 4px;
   margin-left: auto;
@@ -69,8 +69,8 @@
   transition: all 0.15s ease;
 }
 .sidebar__close-btn:hover {
-  background: #F1F5F9;
-  color: #475569;
+  background: rgba(255,255,255,0.08);
+  color: #94A3B8;
 }
 
 /* ---------- Nav ---------- */
@@ -93,7 +93,7 @@
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 1.2px;
-  color: #94A3B8;
+  color: #64748B;
   text-transform: uppercase;
   padding: 14px 8px 6px 8px;
   margin: 0;
@@ -123,7 +123,7 @@
   gap: 12px;
   padding: 10px 12px;
   border-radius: 8px;
-  color: #475569;
+  color: #94A3B8;
   text-decoration: none !important;
   font-size: 14px;
   font-weight: 500;
@@ -132,18 +132,20 @@
   transition: background 150ms ease, color 150ms ease;
   white-space: nowrap;
   box-sizing: border-box;
+  border-left: 3px solid transparent;
 }
 
 .sidebar__nav-item:hover {
-  background: #F1F5F9;
-  color: #0F172A;
+  background: rgba(37,99,235,0.08);
+  color: #CBD5E1;
   text-decoration: none;
 }
 
 .sidebar__nav-item--active {
-  background: #EEF2FF !important;
-  color: #4F46E5 !important;
+  background: rgba(37,99,235,0.15) !important;
+  color: #60A5FA !important;
   font-weight: 600;
+  border-left-color: #2563EB;
 }
 
 /* Icon inside nav item */
@@ -175,7 +177,7 @@
   align-items: center;
   gap: 10px;
   padding: 14px 16px;
-  border-top: 1px solid #E2E8F0;
+  border-top: 1px solid rgba(255,255,255,0.08);
   flex-shrink: 0;
 }
 
@@ -184,11 +186,11 @@
   height: 34px;
   min-width: 34px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4F46E5, #7C3AED);
+  background: linear-gradient(135deg, #2563EB, #0EA5E9);
   color: #ffffff;
   font-size: 12px;
   font-weight: 700;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Bricolage Grotesque', sans-serif;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -202,23 +204,41 @@
 }
 
 .sidebar__user-name {
-  color: #0F172A;
+  color: #E2E8F0;
   font-size: 13px;
   font-weight: 600;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Bricolage Grotesque', sans-serif;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .sidebar__user-role {
-  color: #94A3B8;
+  color: #64748B;
   font-size: 11px;
   white-space: nowrap;
 }
 
+.sidebar__logout-btn {
+  background: none;
+  border: none;
+  color: #64748B;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+.sidebar__logout-btn:hover {
+  background: rgba(239,68,68,0.15);
+  color: #EF4444;
+}
+
 .sidebar__user-settings {
-  color: #94A3B8 !important;
+  color: #64748B !important;
   width: 18px !important;
   height: 18px !important;
   cursor: pointer;
@@ -226,7 +246,7 @@
   transition: color 0.15s ease;
 }
 .sidebar__user-settings:hover {
-  color: #475569 !important;
+  color: #94A3B8 !important;
 }
 
 /* ---------- Overlay (mobile) ---------- */
@@ -234,7 +254,7 @@
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.45);
+  background: rgba(15, 23, 42, 0.6);
   z-index: 199;
   backdrop-filter: blur(4px);
 }
@@ -246,19 +266,19 @@
   top: 14px;
   left: 14px;
   z-index: 300;
-  background: #FFFFFF;
-  border: 1px solid #E2E8F0;
+  background: #0F1729;
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: 8px;
   padding: 8px;
-  color: #475569;
+  color: #94A3B8;
   cursor: pointer;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 .sidebar-hamburger:hover {
-  background: #F8FAFC;
-  border-color: #CBD5E1;
+  background: #1E293B;
+  border-color: rgba(255,255,255,0.15);
 }
 
 /* ============================================================
@@ -287,6 +307,7 @@
   .sidebar__nav-item {
     justify-content: center;
     padding: 12px 0;
+    border-left: none;
   }
 
   .sidebar__user {
@@ -294,8 +315,8 @@
     padding: 14px 0;
   }
 
-  .sidebar__user-settings {
-    display: none !important;
+  .sidebar__logout-btn {
+    display: none;
   }
 
   .main-content {
@@ -309,7 +330,7 @@
     transform: translateX(-100%);
     width: 260px;
     min-width: 260px;
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
   }
 
   .sidebar--open {

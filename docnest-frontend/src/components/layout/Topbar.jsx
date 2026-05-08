@@ -6,9 +6,10 @@ import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { MdMenu, MdSearch, MdNotificationsNone, MdClose } from 'react-icons/md'
+import { useAuth } from '../../context/AuthContext'
 
 const PAGE_TITLES = {
-  '/':            'Overview',
+  '/dashboard':   'Overview',
   '/clients':     'Clients',
   '/clients/add': 'Add Client',
   '/documents':   'Documents',
@@ -17,9 +18,17 @@ const PAGE_TITLES = {
   '/settings':    'Settings',
 }
 
+function getGreeting() {
+  const h = new Date().getHours()
+  if (h < 12) return 'Good morning'
+  if (h < 17) return 'Good afternoon'
+  return 'Good evening'
+}
+
 export default function Topbar({ onToggle }) {
   const location = useLocation()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [search, setSearch] = useState('')
 
   const title = Object.entries(PAGE_TITLES)
@@ -32,6 +41,12 @@ export default function Topbar({ onToggle }) {
       setSearch('')
     }
   }
+
+  const initials = user?.fullName
+    ? user.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : 'U'
+
+  const firstName = user?.fullName?.split(' ')[0] || 'User'
 
   return (
     <div className="top-bar">
@@ -46,17 +61,30 @@ export default function Topbar({ onToggle }) {
         >
           <MdMenu size={20} />
         </IconButton>
-        <Typography 
-          variant="h6" 
-          sx={{ 
-            fontWeight: 600, 
-            color: 'var(--text-primary)', 
-            fontFamily: 'var(--font-heading)',
-            fontSize: '1.1rem',
-          }}
-        >
-          {title}
-        </Typography>
+        <Box>
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              fontWeight: 600, 
+              color: 'var(--text-primary)', 
+              fontFamily: 'var(--font-heading)',
+              fontSize: '1.1rem',
+              lineHeight: 1.3,
+            }}
+          >
+            {title}
+          </Typography>
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'var(--text-muted)',
+              fontSize: '0.75rem',
+              display: 'block',
+            }}
+          >
+            {getGreeting()}, {firstName} 👋
+          </Typography>
+        </Box>
       </Box>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -80,23 +108,24 @@ export default function Topbar({ onToggle }) {
             <IconButton size="small" sx={{ color: 'var(--text-secondary)', position: 'relative' }}>
               <MdNotificationsNone size={22} />
               <Box sx={{ 
-                position: 'absolute', top: 6, right: 6, 
-                width: 7, height: 7, 
-                background: 'var(--danger)', 
+                position: 'absolute', top: 4, right: 4, 
+                width: 8, height: 8, 
+                background: '#EF4444', 
                 borderRadius: '50%', 
-                border: '2px solid var(--surface)' 
+                border: '2px solid var(--surface)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
               }} />
             </IconButton>
           </Tooltip>
           <Box sx={{ width: 1, height: 28, background: 'var(--border)', mx: 1 }} />
           <Avatar sx={{ 
             width: 34, height: 34, 
-            bgcolor: 'var(--primary)', 
+            bgcolor: '#2563EB', 
             fontSize: '0.8rem', fontWeight: 700, 
             cursor: 'pointer',
             fontFamily: 'var(--font-heading)',
           }}>
-            OR
+            {initials}
           </Avatar>
         </Box>
       </Box>

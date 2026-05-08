@@ -1,14 +1,14 @@
-import { useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { MdDashboard, MdPeople, MdPersonAdd, MdFolder, MdAccountTree,
-         MdUpload, MdHistory, MdSettings, MdMenu, MdClose } from 'react-icons/md'
+         MdUpload, MdHistory, MdSettings, MdMenu, MdClose, MdLogout } from 'react-icons/md'
+import { useAuth } from '../../context/AuthContext'
 import './Sidebar.css'
 
 const navSections = [
   {
     label: 'GENERAL',
     items: [
-      { to: '/', icon: <MdDashboard />, label: 'Dashboard', end: true },
+      { to: '/dashboard', icon: <MdDashboard />, label: 'Dashboard', end: true },
       { to: '/clients', icon: <MdPeople />, label: 'Clients', end: true },
       { to: '/clients/add', icon: <MdPersonAdd />, label: 'Add Client' },
       { to: '/documents', icon: <MdFolder />, label: 'Documents' },
@@ -26,21 +26,27 @@ const navSections = [
 ]
 
 export default function Sidebar({ mobileOpen, onToggle }) {
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/')
+  }
+
+  const initials = user?.fullName
+    ? user.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+    : 'U'
+
   return (
     <>
       {/* Mobile hamburger */}
-      <button
-        className="sidebar-hamburger"
-        onClick={onToggle}
-        aria-label="Open menu"
-      >
+      <button className="sidebar-hamburger" onClick={onToggle} aria-label="Open menu">
         <MdMenu size={22} />
       </button>
 
       {/* Overlay for mobile */}
-      {mobileOpen && (
-        <div className="sidebar-overlay" onClick={onToggle} />
-      )}
+      {mobileOpen && <div className="sidebar-overlay" onClick={onToggle} />}
 
       {/* Sidebar */}
       <aside className={`sidebar ${mobileOpen ? 'sidebar--open' : ''}`}>
@@ -81,12 +87,14 @@ export default function Sidebar({ mobileOpen, onToggle }) {
 
         {/* User footer */}
         <div className="sidebar__user">
-          <div className="sidebar__user-avatar">OR</div>
+          <div className="sidebar__user-avatar">{initials}</div>
           <div className="sidebar__user-info">
-            <span className="sidebar__user-name">Om Raj</span>
-            <span className="sidebar__user-role">Administrator</span>
+            <span className="sidebar__user-name">{user?.fullName || 'User'}</span>
+            <span className="sidebar__user-role">{user?.role || 'Employee'}</span>
           </div>
-          <MdSettings className="sidebar__user-settings" size={18} />
+          <button className="sidebar__logout-btn" onClick={handleLogout} title="Logout">
+            <MdLogout size={18} />
+          </button>
         </div>
       </aside>
     </>

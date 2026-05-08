@@ -6,9 +6,13 @@ const api = axios.create({
   timeout: 15000,
 })
 
-// Request interceptor — log outgoing requests
+// Request interceptor — attach JWT token + log
 api.interceptors.request.use(
   (config) => {
+    const token = localStorage.getItem('docnest_token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
     console.log(`[API] ${config.method?.toUpperCase()} ${config.url}`, config.data || '')
     return config
   },

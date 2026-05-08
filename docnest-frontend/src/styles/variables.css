@@ -1,0 +1,61 @@
+/* =============================================
+   DocNest Design Tokens
+   ============================================= */
+
+:root {
+  /* Brand */
+  --brand-primary:      #2563EB;
+  --brand-primary-dark: #1D4ED8;
+  --brand-primary-soft: #EFF6FF;
+  --brand-accent:       #0EA5E9;
+  --brand-gold:         #F59E0B;
+
+  /* Status */
+  --success:  #10B981;
+  --warning:  #F59E0B;
+  --danger:   #EF4444;
+  --info:     #06B6D4;
+
+  /* Neutrals — light theme */
+  --bg-base:       #F8FAFF;
+  --bg-surface:    #FFFFFF;
+  --bg-surface-2:  #F1F5F9;
+  --bg-surface-3:  #E8EFF8;
+
+  /* Text */
+  --text-primary:   #0F1729;
+  --text-secondary: #334155;
+  --text-muted:     #64748B;
+  --text-ghost:     #94A3B8;
+
+  /* Borders */
+  --border:       #E2E8F0;
+  --border-focus: #2563EB;
+
+  /* Sidebar */
+  --sidebar-bg:     #0F1729;
+  --sidebar-accent: #2563EB;
+  --sidebar-text:   #94A3B8;
+  --sidebar-active-bg: rgba(37,99,235,0.15);
+  --sidebar-active-text: #60A5FA;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(15,23,42,0.05);
+  --shadow-sm: 0 2px 8px rgba(15,23,42,0.07);
+  --shadow-md: 0 4px 20px rgba(15,23,42,0.10);
+  --shadow-lg: 0 8px 40px rgba(15,23,42,0.14);
+  --shadow-xl: 0 20px 60px rgba(15,23,42,0.18);
+  --shadow-blue: 0 8px 32px rgba(37,99,235,0.25);
+
+  /* Border Radius */
+  --radius-sm:  6px;
+  --radius:     10px;
+  --radius-md:  14px;
+  --radius-lg:  20px;
+  --radius-xl:  28px;
+  --radius-full: 9999px;
+
+  /* Typography */
+  --font-display: 'Bricolage Grotesque', sans-serif;
+  --font-body:    'Plus Jakarta Sans', sans-serif;
+}

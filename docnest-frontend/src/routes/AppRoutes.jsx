@@ -14,7 +14,7 @@ import NotFoundPage       from '../pages/NotFoundPage'
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/"                          element={<DashboardPage />} />
+      <Route path="/dashboard"                 element={<DashboardPage />} />
       <Route path="/clients"                   element={<ClientListPage />} />
       <Route path="/clients/add"               element={<AddClientPage />} />
       <Route path="/clients/:id"               element={<ClientDetailPage />} />
