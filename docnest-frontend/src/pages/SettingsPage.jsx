@@ -1,34 +1,61 @@
+import { useState } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
+import List from '@mui/material/List'
+import ListItemButton from '@mui/material/ListItemButton'
+import ListItemIcon from '@mui/material/ListItemIcon'
+import ListItemText from '@mui/material/ListItemText'
 import Card from '@mui/material/Card'
-import Chip from '@mui/material/Chip'
-import { MdInfo } from 'react-icons/md'
+import { MdTune, MdLocationOn, MdDescription, MdPerson, MdSettings, MdRocket } from 'react-icons/md'
+import FormFieldsSection from '../components/settings/FormFieldsSection'
+import LocationsSection from '../components/settings/LocationsSection'
+import DocTypesSection from '../components/settings/DocTypesSection'
+import ProfileSection from '../components/settings/ProfileSection'
+import PreferencesSection from '../components/settings/PreferencesSection'
+import FutureSection from '../components/settings/FutureSection'
+
+const TABS = [
+  { key: 'form', label: 'Form Configuration', icon: <MdTune size={18}/>, desc: 'Client form fields' },
+  { key: 'locations', label: 'Locations', icon: <MdLocationOn size={18}/>, desc: 'Location master data' },
+  { key: 'documents', label: 'Document Types', icon: <MdDescription size={18}/>, desc: 'Required documents' },
+  { key: 'profile', label: 'Admin Profile', icon: <MdPerson size={18}/>, desc: 'Your account' },
+  { key: 'preferences', label: 'Preferences', icon: <MdSettings size={18}/>, desc: 'System settings' },
+  { key: 'future', label: 'Coming Soon', icon: <MdRocket size={18}/>, desc: 'Roadmap' },
+]
+
+const SECTIONS = { form: FormFieldsSection, locations: LocationsSection, documents: DocTypesSection, profile: ProfileSection, preferences: PreferencesSection, future: FutureSection }
 
 export default function SettingsPage() {
+  const [tab, setTab] = useState('form')
+  const Section = SECTIONS[tab]
+
   return (
     <Box className="page-enter">
-      <Box sx={{ mb: 5 }}>
-        <Typography variant="h4" sx={{ fontWeight: 600, mb: 0.5 }}>Settings</Typography>
-        <Typography variant="body2" sx={{ color: 'var(--text-secondary)' }}>Manage application preferences and configurations.</Typography>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" sx={{ fontWeight: 600, mb: 0.25, fontSize: '1.6rem' }}>Settings</Typography>
+        <Typography variant="body2" sx={{ color: 'var(--text-secondary)' }}>Configure your DocNest platform.</Typography>
       </Box>
-
-      <Card sx={{ p: 6, textAlign: 'center' }}>
-        <Box sx={{ 
-          width: 80, height: 80, 
-          border: '2px dashed var(--border-strong)', 
-          borderRadius: '50%',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          mx: 'auto', mb: 3,
-          background: 'var(--surface-3)',
-        }}>
-          <Box sx={{ fontSize: 36 }}>⚙️</Box>
+      <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start', flexDirection: { xs: 'column', md: 'row' } }}>
+        {/* Nav */}
+        <Card sx={{ width: { xs: '100%', md: 240 }, flexShrink: 0, overflow: 'hidden' }}>
+          <List disablePadding>
+            {TABS.map(t => (
+              <ListItemButton key={t.key} selected={tab === t.key} onClick={() => setTab(t.key)}
+                sx={{ py: 1.5, px: 2, borderLeft: tab === t.key ? '3px solid var(--primary)' : '3px solid transparent',
+                  '&.Mui-selected': { background: 'var(--primary-light)' }, '&:hover': { background: 'var(--surface-2)' } }}>
+                <ListItemIcon sx={{ minWidth: 32, color: tab === t.key ? 'var(--primary)' : 'var(--text-muted)' }}>{t.icon}</ListItemIcon>
+                <ListItemText primary={t.label} secondary={t.desc}
+                  primaryTypographyProps={{ fontSize: '0.82rem', fontWeight: tab === t.key ? 600 : 500, color: tab === t.key ? 'var(--primary)' : 'var(--text-primary)' }}
+                  secondaryTypographyProps={{ fontSize: '0.6rem', color: 'var(--text-muted)' }} />
+              </ListItemButton>
+            ))}
+          </List>
+        </Card>
+        {/* Content */}
+        <Box sx={{ flex: 1, minWidth: 0, width: { xs: '100%', md: 'auto' } }}>
+          <Section />
         </Box>
-        <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, fontFamily: 'var(--font-heading)' }}>Settings Module</Typography>
-        <Typography variant="body2" sx={{ color: 'var(--text-secondary)', mb: 4, maxWidth: 400, mx: 'auto' }}>
-          We're building advanced configuration options including location management, user roles, and system preferences.
-        </Typography>
-        <Chip icon={<MdInfo />} label="Coming in Version 2.0" sx={{ fontWeight: 600, background: 'var(--primary-light)', color: 'var(--primary)' }} />
-      </Card>
+      </Box>
     </Box>
   )
 }

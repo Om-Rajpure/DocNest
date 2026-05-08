@@ -14,35 +14,51 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { toast } from 'react-toastify'
 import { clientService } from '../services/clientService'
 import { locationService } from '../services/locationService'
+import { settingsService } from '../services/settingsService'
 import { isValidMobile, isValidEmail } from '../utils/validators'
 import { formatDate } from '../utils/formatters'
 
 const STEPS = ['Personal Information', 'Review & Save']
 const GENDERS = ['Male', 'Female', 'Other']
-const EMPTY = { firstName: '', lastName: '', mobile: '', dob: '', gender: '', address: '', email: '', locationId: '' }
 
 export default function AddClientPage() {
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
-  const [form, setForm] = useState(EMPTY)
+  const [form, setForm] = useState({})
   const [errors, setErrors] = useState({})
   const [locations, setLocations] = useState([])
   const [saving, setSaving] = useState(false)
+  const [fieldConfig, setFieldConfig] = useState([])
 
   useEffect(() => {
     locationService.getAll().then(r => setLocations(r.data)).catch(() => {})
+    settingsService.getFormFields().then(r => {
+      setFieldConfig(r.data.filter(f => f.isVisible))
+    }).catch(() => {
+      // Fallback if settings API fails
+      setFieldConfig([
+        { fieldName: 'firstName', label: 'First Name', fieldType: 'TEXT', isRequired: true },
+        { fieldName: 'lastName', label: 'Last Name', fieldType: 'TEXT', isRequired: true },
+        { fieldName: 'mobile', label: 'Mobile Number', fieldType: 'TEXT', isRequired: true },
+        { fieldName: 'dob', label: 'Date of Birth', fieldType: 'DATE', isRequired: false },
+        { fieldName: 'gender', label: 'Gender', fieldType: 'SELECT', isRequired: false },
+        { fieldName: 'locationId', label: 'Primary Location', fieldType: 'SELECT', isRequired: true },
+        { fieldName: 'email', label: 'Email Address', fieldType: 'TEXT', isRequired: false },
+        { fieldName: 'address', label: 'Full Address', fieldType: 'TEXTAREA', isRequired: false },
+      ])
+    })
   }, [])
 
-  const set = (field) => (e) => { setForm(f => ({ ...f, [field]: e.target.value })); setErrors(e => ({ ...e, [field]: undefined })) }
+  const set = (field) => (e) => { setForm(f => ({ ...f, [field]: e.target.value })); setErrors(e2 => ({ ...e2, [field]: undefined })) }
 
   const validate = () => {
     const errs = {}
-    if (!form.firstName?.trim()) errs.firstName = 'First name is required'
-    if (!form.lastName?.trim())  errs.lastName  = 'Last name is required'
-    if (!form.mobile?.trim())    errs.mobile    = 'Mobile is required'
-    else if (!isValidMobile(form.mobile)) errs.mobile = 'Enter a valid 10-digit mobile number'
-    if (!form.locationId)        errs.locationId = 'Location is required'
-    if (form.email && !isValidEmail(form.email)) errs.email = 'Enter a valid email address'
+    for (const fc of fieldConfig) {
+      const val = form[fc.fieldName]
+      if (fc.isRequired && (!val || !String(val).trim())) errs[fc.fieldName] = `${fc.label} is required`
+    }
+    if (form.mobile && !isValidMobile(form.mobile)) errs.mobile = 'Enter a valid 10-digit number'
+    if (form.email && !isValidEmail(form.email)) errs.email = 'Enter a valid email'
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -52,23 +68,43 @@ export default function AddClientPage() {
   const handleSave = async () => {
     try {
       setSaving(true)
-      const payload = {
-        ...form,
-        locationId: form.locationId ? Number(form.locationId) : null,
-        dob: form.dob || null,
-      }
+      const payload = { ...form, locationId: form.locationId ? Number(form.locationId) : null, dob: form.dob || null }
       const res = await clientService.create(payload)
       toast.success('Client profile created successfully! Redirecting to Document Center...')
       navigate(`/clients/${res.data.id}/documents`)
     } catch (err) {
-      console.error('Save client error:', err)
-      toast.error(err.message || 'Unable to save client. Please check your connection.')
-    } finally {
-      setSaving(false)
+      toast.error(err.message || 'Unable to save client.')
+    } finally { setSaving(false) }
+  }
+
+  const renderField = (fc) => {
+    const { fieldName, label, fieldType, isRequired } = fc
+    const lbl = isRequired ? `${label} *` : label
+    const half = !['address'].includes(fieldName)
+
+    let input
+    if (fieldName === 'gender') {
+      input = <TextField select fullWidth label={lbl} value={form.gender || ''} onChange={set('gender')} error={!!errors.gender} helperText={errors.gender}>{GENDERS.map(g => <MenuItem key={g} value={g}>{g}</MenuItem>)}</TextField>
+    } else if (fieldName === 'locationId') {
+      input = <TextField select fullWidth label={lbl} value={form.locationId || ''} onChange={set('locationId')} error={!!errors.locationId} helperText={errors.locationId}>{locations.map(l => <MenuItem key={l.id} value={l.id}>{l.locationName}</MenuItem>)}</TextField>
+    } else if (fieldType === 'DATE') {
+      input = <TextField fullWidth label={lbl} type="date" value={form[fieldName] || ''} onChange={set(fieldName)} InputLabelProps={{ shrink: true }} error={!!errors[fieldName]} helperText={errors[fieldName]} />
+    } else if (fieldType === 'TEXTAREA') {
+      input = <TextField fullWidth label={lbl} multiline rows={3} value={form[fieldName] || ''} onChange={set(fieldName)} error={!!errors[fieldName]} helperText={errors[fieldName]} />
+    } else {
+      input = <TextField fullWidth label={lbl} value={form[fieldName] || ''} onChange={set(fieldName)} error={!!errors[fieldName]} helperText={errors[fieldName]} inputProps={fieldName === 'mobile' ? { maxLength: 10 } : {}} type={fieldName === 'email' ? 'email' : 'text'} />
     }
+    return <Grid item xs={12} sm={half ? 6 : 12} key={fieldName}>{input}</Grid>
   }
 
   const loc = locations.find(l => l.id === Number(form.locationId))
+
+  const reviewFields = fieldConfig.map(fc => {
+    let val = form[fc.fieldName]
+    if (fc.fieldName === 'locationId') val = loc?.locationName
+    if (fc.fieldName === 'dob' && val) val = formatDate(val)
+    return { label: fc.label, value: val || 'N/A' }
+  })
 
   return (
     <Box className="page-enter" sx={{ maxWidth: 900, mx: 'auto' }}>
@@ -76,7 +112,6 @@ export default function AddClientPage() {
         <Typography variant="h4" sx={{ fontWeight: 600, mb: 0.5 }}>Add New Client</Typography>
         <Typography variant="body2" sx={{ color: 'var(--text-secondary)' }}>Create a professional profile for your new client.</Typography>
       </Box>
-
       <Stepper activeStep={step} sx={{ mb: 5, '& .MuiStepLabel-label': { fontFamily: 'var(--font-body)', fontSize: '0.875rem' } }}>
         {STEPS.map(label => <Step key={label}><StepLabel>{label}</StepLabel></Step>)}
       </Stepper>
@@ -84,22 +119,10 @@ export default function AddClientPage() {
       {step === 0 && (
         <Card sx={{ p: 4, mb: 4 }}>
           <Typography variant="h6" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Box sx={{ width: 4, height: 20, background: 'var(--primary)', borderRadius: 2 }} />
-            Client Details
+            <Box sx={{ width: 4, height: 20, background: 'var(--primary)', borderRadius: 2 }} /> Client Details
           </Typography>
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}><TextField fullWidth label="First Name" value={form.firstName} onChange={set('firstName')} error={!!errors.firstName} helperText={errors.firstName} /></Grid>
-            <Grid item xs={12} sm={6}><TextField fullWidth label="Last Name" value={form.lastName} onChange={set('lastName')} error={!!errors.lastName} helperText={errors.lastName} /></Grid>
-            <Grid item xs={12} sm={6}><TextField fullWidth label="Mobile Number" value={form.mobile} onChange={set('mobile')} error={!!errors.mobile} helperText={errors.mobile} inputProps={{ maxLength: 10 }} /></Grid>
-            <Grid item xs={12} sm={6}><TextField fullWidth label="Date of Birth" type="date" value={form.dob} onChange={set('dob')} InputLabelProps={{ shrink: true }} /></Grid>
-            <Grid item xs={12} sm={6}><TextField select fullWidth label="Gender" value={form.gender} onChange={set('gender')}>{GENDERS.map(g => <MenuItem key={g} value={g}>{g}</MenuItem>)}</TextField></Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField select fullWidth label="Primary Location" value={form.locationId} onChange={set('locationId')} error={!!errors.locationId} helperText={errors.locationId}>
-                {locations.map(l => <MenuItem key={l.id} value={l.id}>{l.locationName}</MenuItem>)}
-              </TextField>
-            </Grid>
-            <Grid item xs={12}><TextField fullWidth label="Email Address" type="email" value={form.email} onChange={set('email')} error={!!errors.email} helperText={errors.email} /></Grid>
-            <Grid item xs={12}><TextField fullWidth label="Full Residential Address" multiline rows={3} value={form.address} onChange={set('address')} /></Grid>
+            {fieldConfig.map(renderField)}
           </Grid>
         </Card>
       )}
@@ -107,31 +130,17 @@ export default function AddClientPage() {
       {step === 1 && (
         <Card sx={{ p: 4, mb: 4 }}>
           <Typography variant="h6" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Box sx={{ width: 4, height: 20, background: 'var(--success)', borderRadius: 2 }} />
-            Final Review
+            <Box sx={{ width: 4, height: 20, background: 'var(--success)', borderRadius: 2 }} /> Final Review
           </Typography>
           <Grid container spacing={2}>
-            {[
-              { label: 'Full Name', value: `${form.firstName} ${form.lastName}` },
-              { label: 'Mobile', value: form.mobile },
-              { label: 'Location', value: loc?.locationName || 'N/A' },
-              { label: 'Email', value: form.email || 'N/A' },
-              { label: 'DOB', value: form.dob ? formatDate(form.dob) : 'N/A' },
-              { label: 'Gender', value: form.gender || 'N/A' },
-            ].map((f, i) => (
-              <Grid item xs={12} sm={6} key={i}>
+            {reviewFields.map((f, i) => (
+              <Grid item xs={12} sm={f.label === 'Full Address' ? 12 : 6} key={i}>
                 <Box sx={{ p: 2, background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
                   <Typography variant="caption" sx={{ color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', fontSize: '0.6rem', letterSpacing: '0.05em' }}>{f.label}</Typography>
                   <Typography variant="body1" sx={{ fontWeight: 600, color: 'var(--text-primary)' }}>{f.value}</Typography>
                 </Box>
               </Grid>
             ))}
-            <Grid item xs={12}>
-              <Box sx={{ p: 2, background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
-                <Typography variant="caption" sx={{ color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', fontSize: '0.6rem', letterSpacing: '0.05em' }}>Full Address</Typography>
-                <Typography variant="body1" sx={{ fontWeight: 600, color: 'var(--text-primary)' }}>{form.address || 'Not provided'}</Typography>
-              </Box>
-            </Grid>
           </Grid>
         </Card>
       )}

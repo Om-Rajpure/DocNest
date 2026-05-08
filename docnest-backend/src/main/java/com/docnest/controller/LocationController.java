@@ -11,7 +11,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/locations")
 @RequiredArgsConstructor
-
 public class LocationController {
 
     private final LocationRepository locationRepository;
@@ -23,7 +22,18 @@ public class LocationController {
 
     @PostMapping
     public ResponseEntity<Location> add(@RequestBody Location location) {
+        if (locationRepository.existsByLocationNameIgnoreCase(location.getLocationName())) {
+            return ResponseEntity.badRequest().build();
+        }
         return ResponseEntity.ok(locationRepository.save(location));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Location> update(@PathVariable Long id, @RequestBody Location location) {
+        Location existing = locationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Location not found: " + id));
+        existing.setLocationName(location.getLocationName());
+        return ResponseEntity.ok(locationRepository.save(existing));
     }
 
     @DeleteMapping("/{id}")

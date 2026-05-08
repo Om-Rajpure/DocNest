@@ -1,7 +1,7 @@
 package com.docnest.config;
 
-import com.docnest.entity.Location;
-import com.docnest.repository.LocationRepository;
+import com.docnest.entity.*;
+import com.docnest.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -15,6 +15,10 @@ import java.util.List;
 public class DataLoader implements CommandLineRunner {
 
     private final LocationRepository locationRepository;
+    private final FormFieldConfigRepository formFieldRepo;
+    private final DocumentTypeConfigRepository docTypeRepo;
+    private final AdminProfileRepository profileRepo;
+    private final SystemPreferenceRepository prefRepo;
 
     private static final List<String> DEFAULT_LOCATIONS = List.of(
             "Thane", "Navi Mumbai", "Mumbai",
@@ -24,12 +28,70 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        seedLocations();
+        seedFormFields();
+        seedDocumentTypes();
+        seedAdminProfile();
+        seedPreferences();
+        log.info("DocNest started successfully. All seeds applied.");
+    }
+
+    private void seedLocations() {
         for (String name : DEFAULT_LOCATIONS) {
             if (!locationRepository.existsByLocationNameIgnoreCase(name)) {
                 locationRepository.save(Location.builder().locationName(name).build());
-                log.info("Seeded location: {}", name);
             }
         }
-        log.info("DocNest started successfully. Locations seeded.");
+    }
+
+    private void seedFormFields() {
+        if (formFieldRepo.count() > 0) return;
+        List<FormFieldConfig> fields = List.of(
+            FormFieldConfig.builder().fieldName("firstName").label("First Name").description("Client's first name").fieldType("TEXT").isVisible(true).isRequired(true).displayOrder(1).build(),
+            FormFieldConfig.builder().fieldName("lastName").label("Last Name").description("Client's last name").fieldType("TEXT").isVisible(true).isRequired(true).displayOrder(2).build(),
+            FormFieldConfig.builder().fieldName("mobile").label("Mobile Number").description("10-digit contact number").fieldType("TEXT").isVisible(true).isRequired(true).displayOrder(3).build(),
+            FormFieldConfig.builder().fieldName("dob").label("Date of Birth").description("Client's date of birth").fieldType("DATE").isVisible(true).isRequired(false).displayOrder(4).build(),
+            FormFieldConfig.builder().fieldName("gender").label("Gender").description("Client's gender identity").fieldType("SELECT").isVisible(true).isRequired(false).displayOrder(5).build(),
+            FormFieldConfig.builder().fieldName("locationId").label("Primary Location").description("Office location assignment").fieldType("SELECT").isVisible(true).isRequired(true).displayOrder(6).build(),
+            FormFieldConfig.builder().fieldName("email").label("Email Address").description("Client's email for communication").fieldType("TEXT").isVisible(true).isRequired(false).displayOrder(7).build(),
+            FormFieldConfig.builder().fieldName("address").label("Full Address").description("Residential address").fieldType("TEXTAREA").isVisible(true).isRequired(false).displayOrder(8).build()
+        );
+        formFieldRepo.saveAll(fields);
+        log.info("Seeded {} form field configs", fields.size());
+    }
+
+    private void seedDocumentTypes() {
+        if (docTypeRepo.count() > 0) return;
+        List<DocumentTypeConfig> types = List.of(
+            DocumentTypeConfig.builder().typeName("AADHAR").displayName("Aadhar Card").description("Aadhaar identity document").isRequired(true).isActive(true).build(),
+            DocumentTypeConfig.builder().typeName("PAN").displayName("PAN Card").description("Permanent Account Number card").isRequired(true).isActive(true).build(),
+            DocumentTypeConfig.builder().typeName("DRIVING_LICENSE").displayName("Driving License").description("Government driving permit").isRequired(true).isActive(true).build(),
+            DocumentTypeConfig.builder().typeName("ELECTRICITY_BILL").displayName("Electricity Bill").description("Address proof utility bill").isRequired(true).isActive(true).build()
+        );
+        docTypeRepo.saveAll(types);
+        log.info("Seeded {} document type configs", types.size());
+    }
+
+    private void seedAdminProfile() {
+        if (profileRepo.count() > 0) return;
+        profileRepo.save(AdminProfile.builder()
+                .fullName("Om Raj")
+                .email("admin@docnest.com")
+                .mobile("9876543210")
+                .build());
+        log.info("Seeded admin profile");
+    }
+
+    private void seedPreferences() {
+        if (prefRepo.count() > 0) return;
+        List<SystemPreference> prefs = List.of(
+            SystemPreference.builder().prefKey("enable_doc_preview").prefValue("true").description("Enable inline document preview").build(),
+            SystemPreference.builder().prefKey("enable_activity_logs").prefValue("true").description("Record all user activities").build(),
+            SystemPreference.builder().prefKey("enable_notifications").prefValue("true").description("Show system notifications").build(),
+            SystemPreference.builder().prefKey("default_page_size").prefValue("10").description("Default rows per page").build(),
+            SystemPreference.builder().prefKey("enable_upload_compression").prefValue("false").description("Compress uploaded images").build()
+        );
+        prefRepo.saveAll(prefs);
+        log.info("Seeded {} system preferences", prefs.size());
     }
 }
