@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: { 'Content-Type': 'application/json' },
   timeout: 15000,
 })
@@ -13,19 +13,29 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
-    console.log(`[API] ${config.method?.toUpperCase()} ${config.url}`, config.data || '')
     return config
   },
   (error) => Promise.reject(error)
 )
 
-// Response interceptor — detailed error messages
+// Response interceptor — detailed error messages + auth handling
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response) {
       const status = error.response.status
       const data = error.response.data
+
+      // Handle Authentication Failures
+      if (status === 401 || status === 403) {
+        console.warn('[API] Auth failed, clearing session');
+        localStorage.removeItem('docnest_token');
+        // Optional: redirect to login if not already there
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login?expired=true';
+        }
+      }
+
       console.error(`[API Error] ${status}:`, data)
 
       let message = data?.error || data?.message || ''
@@ -36,7 +46,7 @@ api.interceptors.response.use(
 
       return Promise.reject(new Error(message))
     } else if (error.request) {
-      console.error('[API Error] No response — is the backend running on port 8080?')
+      console.error('[API Error] No response — is the backend running?')
       return Promise.reject(new Error('Cannot reach server. Make sure the backend is running.'))
     }
     return Promise.reject(new Error(error.message || 'Something went wrong'))

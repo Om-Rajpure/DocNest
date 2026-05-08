@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: docnest-backend
+    env: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./docnest-backend/Dockerfile
+    dockerContext: ./docnest-backend
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: JAVA_OPTS
+        value: "-Xmx512m"
