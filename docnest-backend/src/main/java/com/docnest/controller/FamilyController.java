@@ -3,6 +3,7 @@ package com.docnest.controller;
 import com.docnest.dto.FamilyMemberDTO;
 import com.docnest.dto.FamilyTreeNodeDTO;
 import com.docnest.service.FamilyService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,13 +19,13 @@ public class FamilyController {
     private final FamilyService familyService;
 
     @PostMapping
-    public ResponseEntity<FamilyMemberDTO> addMember(@RequestBody FamilyMemberDTO dto) {
+    public ResponseEntity<FamilyMemberDTO> addMember(@Valid @RequestBody FamilyMemberDTO dto) {
         return ResponseEntity.ok(familyService.addFamilyMember(dto));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<FamilyMemberDTO> updateMember(@PathVariable Long id,
-                                                         @RequestBody FamilyMemberDTO dto) {
+                                                         @Valid @RequestBody FamilyMemberDTO dto) {
         return ResponseEntity.ok(familyService.updateFamilyMember(id, dto));
     }
 

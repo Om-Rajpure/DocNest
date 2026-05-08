@@ -260,6 +260,7 @@ export default function DocumentCenterPage() {
           clientId={Number(id)}
           member={editMember}
           onSaved={loadFamily}
+          clientDob={client?.dob}
         />
       )}
       <ConfirmModal

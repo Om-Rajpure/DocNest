@@ -249,7 +249,7 @@ export default function ClientDetailPage() {
 
       {/* Modals */}
       <DocumentPreviewModal open={!!previewDoc} document={previewDoc} onClose={() => setPreviewDoc(null)} />
-      {familyFormOpen && <FamilyMemberForm open={familyFormOpen} onClose={() => setFamilyFormOpen(false)} clientId={Number(id)} member={editMember} onSaved={loadFamily} />}
+      {familyFormOpen && <FamilyMemberForm open={familyFormOpen} onClose={() => setFamilyFormOpen(false)} clientId={Number(id)} member={editMember} onSaved={loadFamily} clientDob={client?.dob} />}
       <ConfirmModal open={!!deleteMemberId} title="Remove Family Member" message="Are you sure? This action cannot be undone." onConfirm={handleDeleteMember} onCancel={() => setDeleteMemberId(null)} />
     </Box>
   )

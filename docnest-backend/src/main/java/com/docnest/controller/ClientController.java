@@ -2,6 +2,7 @@ package com.docnest.controller;
 
 import com.docnest.dto.ClientDTO;
 import com.docnest.service.ClientService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,7 @@ public class ClientController {
     private final ClientService clientService;
 
     @PostMapping
-    public ResponseEntity<ClientDTO> addClient(@RequestBody ClientDTO dto) {
+    public ResponseEntity<ClientDTO> addClient(@Valid @RequestBody ClientDTO dto) {
         return ResponseEntity.ok(clientService.addClient(dto));
     }
 
@@ -35,7 +36,7 @@ public class ClientController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ClientDTO> updateClient(@PathVariable Long id, @RequestBody ClientDTO dto) {
+    public ResponseEntity<ClientDTO> updateClient(@PathVariable Long id, @Valid @RequestBody ClientDTO dto) {
         return ResponseEntity.ok(clientService.updateClient(id, dto));
     }
 

@@ -11,21 +11,28 @@ import TextField from '@mui/material/TextField'
 import MenuItem from '@mui/material/MenuItem'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
+import InputAdornment from '@mui/material/InputAdornment'
+import { MdCheckCircle, MdError } from 'react-icons/md'
 import { toast } from 'react-toastify'
 import { clientService } from '../services/clientService'
 import { locationService } from '../services/locationService'
 import { settingsService } from '../services/settingsService'
-import { isValidMobile, isValidEmail } from '../utils/validators'
+import { validateClientForm, isValidMobile, isValidEmail, isDobValid, isClientAgeValid, numbersOnly } from '../utils/validators'
 import { formatDate } from '../utils/formatters'
 
 const STEPS = ['Personal Information', 'Review & Save']
 const GENDERS = ['Male', 'Female', 'Other']
+
+const ValidationIcon = ({ valid }) => valid
+  ? <MdCheckCircle size={18} color="var(--success)" style={{ transition: 'all 0.2s' }} />
+  : <MdError size={18} color="var(--danger)" style={{ transition: 'all 0.2s' }} />
 
 export default function AddClientPage() {
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [form, setForm] = useState({})
   const [errors, setErrors] = useState({})
+  const [touched, setTouched] = useState({})
   const [locations, setLocations] = useState([])
   const [saving, setSaving] = useState(false)
   const [fieldConfig, setFieldConfig] = useState([])
@@ -35,7 +42,6 @@ export default function AddClientPage() {
     settingsService.getFormFields().then(r => {
       setFieldConfig(r.data.filter(f => f.isVisible))
     }).catch(() => {
-      // Fallback if settings API fails
       setFieldConfig([
         { fieldName: 'firstName', label: 'First Name', fieldType: 'TEXT', isRequired: true },
         { fieldName: 'lastName', label: 'Last Name', fieldType: 'TEXT', isRequired: true },
@@ -49,17 +55,46 @@ export default function AddClientPage() {
     })
   }, [])
 
-  const set = (field) => (e) => { setForm(f => ({ ...f, [field]: e.target.value })); setErrors(e2 => ({ ...e2, [field]: undefined })) }
+  const set = (field) => (e) => {
+    let val = e.target.value
+    setForm(f => ({ ...f, [field]: val }))
+    setTouched(t => ({ ...t, [field]: true }))
+    // Live clear error on change
+    setErrors(errs => ({ ...errs, [field]: undefined }))
+  }
+
+  const onBlur = (field) => () => {
+    setTouched(t => ({ ...t, [field]: true }))
+    // Live validate on blur
+    const val = form[field]
+    const fc = fieldConfig.find(f => f.fieldName === field)
+    let err
+    if (fc?.isRequired && (!val || !String(val).trim())) err = `${fc.label} is required`
+    else if (field === 'mobile' && val && !isValidMobile(val)) err = 'Must start with 6-9 and be 10 digits'
+    else if (field === 'email' && val && !isValidEmail(val)) err = 'Enter a valid email address'
+    else if (field === 'dob' && val) {
+      const dCheck = isDobValid(val)
+      if (!dCheck.valid) err = dCheck.message
+      else { const aCheck = isClientAgeValid(val); if (!aCheck.valid) err = aCheck.message }
+    }
+    if (err) setErrors(errs => ({ ...errs, [field]: err }))
+  }
+
+  const isFieldValid = (field) => {
+    const val = form[field]
+    if (!val || !String(val).trim()) return null // not typed yet
+    if (field === 'mobile') return isValidMobile(val)
+    if (field === 'email') return isValidEmail(val)
+    if (field === 'dob') return isDobValid(val).valid && isClientAgeValid(val).valid
+    if (field === 'firstName' || field === 'lastName') return String(val).trim().length >= 2
+    return !!String(val).trim()
+  }
 
   const validate = () => {
-    const errs = {}
-    for (const fc of fieldConfig) {
-      const val = form[fc.fieldName]
-      if (fc.isRequired && (!val || !String(val).trim())) errs[fc.fieldName] = `${fc.label} is required`
-    }
-    if (form.mobile && !isValidMobile(form.mobile)) errs.mobile = 'Enter a valid 10-digit number'
-    if (form.email && !isValidEmail(form.email)) errs.email = 'Enter a valid email'
+    const errs = validateClientForm(form, fieldConfig)
     setErrors(errs)
+    // Mark all as touched
+    const t = {}; fieldConfig.forEach(fc => { t[fc.fieldName] = true }); setTouched(t)
     return Object.keys(errs).length === 0
   }
 
@@ -73,8 +108,24 @@ export default function AddClientPage() {
       toast.success('Client profile created successfully! Redirecting to Document Center...')
       navigate(`/clients/${res.data.id}/documents`)
     } catch (err) {
-      toast.error(err.message || 'Unable to save client.')
+      // Handle backend validation errors
+      const data = err.response?.data
+      if (data?.fieldErrors) {
+        const errs = {}
+        data.fieldErrors.forEach(fe => { errs[fe.field] = fe.message })
+        setErrors(errs)
+        setStep(0)
+        toast.error('Please fix the validation errors')
+      } else {
+        toast.error(data?.error || 'Unable to save client.')
+      }
     } finally { setSaving(false) }
+  }
+
+  const getAdornment = (field) => {
+    const v = isFieldValid(field)
+    if (v === null || !touched[field]) return {}
+    return { endAdornment: <InputAdornment position="end"><ValidationIcon valid={v} /></InputAdornment> }
   }
 
   const renderField = (fc) => {
@@ -84,15 +135,18 @@ export default function AddClientPage() {
 
     let input
     if (fieldName === 'gender') {
-      input = <TextField select fullWidth label={lbl} value={form.gender || ''} onChange={set('gender')} error={!!errors.gender} helperText={errors.gender}>{GENDERS.map(g => <MenuItem key={g} value={g}>{g}</MenuItem>)}</TextField>
+      input = <TextField select fullWidth label={lbl} value={form.gender || ''} onChange={set('gender')} onBlur={onBlur('gender')} error={touched.gender && !!errors.gender} helperText={touched.gender && errors.gender} InputProps={getAdornment('gender')}>{GENDERS.map(g => <MenuItem key={g} value={g}>{g}</MenuItem>)}</TextField>
     } else if (fieldName === 'locationId') {
-      input = <TextField select fullWidth label={lbl} value={form.locationId || ''} onChange={set('locationId')} error={!!errors.locationId} helperText={errors.locationId}>{locations.map(l => <MenuItem key={l.id} value={l.id}>{l.locationName}</MenuItem>)}</TextField>
+      input = <TextField select fullWidth label={lbl} value={form.locationId || ''} onChange={set('locationId')} onBlur={onBlur('locationId')} error={touched.locationId && !!errors.locationId} helperText={touched.locationId && errors.locationId}>{locations.map(l => <MenuItem key={l.id} value={l.id}>{l.locationName}</MenuItem>)}</TextField>
     } else if (fieldType === 'DATE') {
-      input = <TextField fullWidth label={lbl} type="date" value={form[fieldName] || ''} onChange={set(fieldName)} InputLabelProps={{ shrink: true }} error={!!errors[fieldName]} helperText={errors[fieldName]} />
+      input = <TextField fullWidth label={lbl} type="date" value={form[fieldName] || ''} onChange={set(fieldName)} onBlur={onBlur(fieldName)} InputLabelProps={{ shrink: true }} error={touched[fieldName] && !!errors[fieldName]} helperText={touched[fieldName] && errors[fieldName]} InputProps={getAdornment(fieldName)} />
     } else if (fieldType === 'TEXTAREA') {
-      input = <TextField fullWidth label={lbl} multiline rows={3} value={form[fieldName] || ''} onChange={set(fieldName)} error={!!errors[fieldName]} helperText={errors[fieldName]} />
+      input = <TextField fullWidth label={lbl} multiline rows={3} value={form[fieldName] || ''} onChange={set(fieldName)} onBlur={onBlur(fieldName)} error={touched[fieldName] && !!errors[fieldName]} helperText={touched[fieldName] && errors[fieldName]} />
+    } else if (fieldName === 'mobile') {
+      input = <TextField fullWidth label={lbl} value={form.mobile || ''} onChange={(e) => { numbersOnly(e); set('mobile')(e) }} onBlur={onBlur('mobile')} error={touched.mobile && !!errors.mobile} helperText={touched.mobile ? (errors.mobile || (form.mobile && isValidMobile(form.mobile) ? '✓ Valid Indian mobile' : '')) : ''} inputProps={{ maxLength: 10, inputMode: 'numeric' }} InputProps={getAdornment('mobile')}
+        FormHelperTextProps={{ sx: { color: !errors.mobile && form.mobile && isValidMobile(form.mobile) ? 'var(--success)' : undefined } }} />
     } else {
-      input = <TextField fullWidth label={lbl} value={form[fieldName] || ''} onChange={set(fieldName)} error={!!errors[fieldName]} helperText={errors[fieldName]} inputProps={fieldName === 'mobile' ? { maxLength: 10 } : {}} type={fieldName === 'email' ? 'email' : 'text'} />
+      input = <TextField fullWidth label={lbl} value={form[fieldName] || ''} onChange={set(fieldName)} onBlur={onBlur(fieldName)} error={touched[fieldName] && !!errors[fieldName]} helperText={touched[fieldName] && errors[fieldName]} type={fieldName === 'email' ? 'email' : 'text'} InputProps={getAdornment(fieldName)} />
     }
     return <Grid item xs={12} sm={half ? 6 : 12} key={fieldName}>{input}</Grid>
   }

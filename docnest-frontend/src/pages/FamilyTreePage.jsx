@@ -103,6 +103,7 @@ export default function FamilyTreePage() {
           onClose={() => setFormOpen(false)}
           clientId={Number(selected)}
           onSaved={() => loadTree(selected)}
+          clientDob={client?.dob}
         />
       )}
     </Box>

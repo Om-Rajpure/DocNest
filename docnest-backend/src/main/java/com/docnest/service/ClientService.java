@@ -13,6 +13,8 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -31,8 +33,17 @@ public class ClientService {
     private static final List<String> REQUIRED_DOC_TYPES =
             Arrays.asList("AADHAR", "PAN", "DRIVING_LICENSE", "ELECTRICITY_BILL");
 
+    private void validateDob(LocalDate dob) {
+        if (dob == null) return;
+        if (dob.isAfter(LocalDate.now())) throw new IllegalArgumentException("Date of birth cannot be in the future");
+        int age = Period.between(dob, LocalDate.now()).getYears();
+        if (age < 18) throw new IllegalArgumentException("Client must be at least 18 years old");
+        if (age > 100) throw new IllegalArgumentException("Please enter a realistic date of birth");
+    }
+
     @Transactional
     public ClientDTO addClient(ClientDTO dto) {
+        validateDob(dto.getDob());
         Location location = locationRepository.findById(dto.getLocationId())
                 .orElseThrow(() -> new ResourceNotFoundException("Location not found"));
 
@@ -56,6 +67,7 @@ public class ClientService {
 
     @Transactional
     public ClientDTO updateClient(Long id, ClientDTO dto) {
+        validateDob(dto.getDob());
         Client client = clientRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Client not found with id: " + id));
 
