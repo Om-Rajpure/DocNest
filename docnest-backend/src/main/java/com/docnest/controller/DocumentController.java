@@ -23,8 +23,10 @@ public class DocumentController {
             @RequestParam(defaultValue = "CLIENT") String ownerType,
             @RequestParam Long ownerId,
             @RequestParam(required = false) String documentType,
-            @RequestParam("file") MultipartFile file) {
-        return ResponseEntity.ok(documentService.uploadDocument(ownerType, ownerId, documentType, file));
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "ocrText", required = false) String ocrText,
+            @RequestParam(value = "confidence", required = false) Integer confidence) {
+        return ResponseEntity.ok(documentService.uploadDocument(ownerType, ownerId, documentType, file, ocrText, confidence));
     }
 
     @PutMapping("/replace/{id}")

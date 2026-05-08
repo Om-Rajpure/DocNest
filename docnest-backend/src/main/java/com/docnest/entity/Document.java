@@ -33,6 +33,18 @@ public class Document {
     @Column(name = "file_path", length = 500)
     private String filePath;
 
+    @Column(name = "mime_type", length = 50)
+    private String mimeType;
+
+    @Column(name = "file_size")
+    private Long fileSize;
+
+    @Column(name = "ocr_confidence")
+    private Integer ocrConfidence;
+
+    @Column(name = "ocr_extracted_text", columnDefinition = "TEXT")
+    private String ocrExtractedText;
+
     @CreationTimestamp
     @Column(name = "upload_date", updatable = false)
     private LocalDateTime uploadDate;

@@ -31,7 +31,7 @@ public class DocumentService {
             Arrays.asList("AADHAR", "PAN", "DRIVING_LICENSE", "ELECTRICITY_BILL");
 
     @Transactional
-    public DocumentDTO uploadDocument(String ownerType, Long ownerId, String documentType, MultipartFile file) {
+    public DocumentDTO uploadDocument(String ownerType, Long ownerId, String documentType, MultipartFile file, String ocrText, Integer confidence) {
         String ownerName = resolveOwnerName(ownerType, ownerId);
 
         if (documentType == null || documentType.isBlank()) {
@@ -46,6 +46,10 @@ public class DocumentService {
                 .documentType(documentType.toUpperCase())
                 .fileName(file.getOriginalFilename())
                 .filePath(relativePath)
+                .mimeType(file.getContentType())
+                .fileSize(file.getSize())
+                .ocrExtractedText(ocrText)
+                .ocrConfidence(confidence)
                 .build();
 
         Document saved = documentRepository.save(doc);
@@ -147,6 +151,9 @@ public class DocumentService {
                 .documentType(d.getDocumentType())
                 .fileName(d.getFileName())
                 .filePath(d.getFilePath())
+                .mimeType(d.getMimeType())
+                .fileSize(d.getFileSize())
+                .ocrConfidence(d.getOcrConfidence())
                 .uploadDate(d.getUploadDate())
                 .previewUrl("/api/documents/preview/" + d.getId())
                 .build();

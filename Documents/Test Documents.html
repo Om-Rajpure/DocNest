@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Dummy Aadhaar Card - TEST ONLY</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #e5e5e5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 30px;
+    padding: 40px;
+    font-family: 'Arial', sans-serif;
+  }
+
+  .watermark-label {
+    background: #FF0000;
+    color: white;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 6px 20px;
+    border-radius: 4px;
+    letter-spacing: 2px;
+  }
+
+  /* ── CARD WRAPPER ── */
+  .aadhaar-card {
+    width: 380px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    font-family: Arial, sans-serif;
+  }
+
+  /* ── FRONT SIDE ── */
+  .card-front {
+    background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%);
+    border: 2px solid #d0d8f0;
+    padding: 0;
+  }
+
+  .card-header {
+    background: linear-gradient(90deg, #1a3a8f 0%, #0d2b6e 100%);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .emblem {
+    width: 38px;
+    height: 38px;
+    background: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .header-text-block {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .govt-text {
+    color: #ffffff;
+    font-size: 9px;
+    font-weight: normal;
+    letter-spacing: 0.5px;
+    line-height: 1.4;
+  }
+
+  .aadhaar-title {
+    color: #FFD700;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    font-family: Georgia, serif;
+  }
+
+  .aadhaar-hindi {
+    color: #FFD700;
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+
+  .card-body {
+    padding: 14px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .photo-box {
+    width: 80px;
+    height: 95px;
+    border: 2px solid #1a3a8f;
+    border-radius: 6px;
+    background: linear-gradient(145deg, #dde8ff, #c8d8f8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 32px;
+    color: #1a3a8f;
+    overflow: hidden;
+  }
+
+  .photo-label {
+    font-size: 7px;
+    color: #5566aa;
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  .card-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .name-row {
+    font-size: 15px;
+    font-weight: bold;
+    color: #0a1f5c;
+    letter-spacing: 0.3px;
+  }
+
+  .info-row {
+    display: flex;
+    gap: 4px;
+    font-size: 11px;
+  }
+
+  .info-label {
+    color: #666;
+    font-weight: normal;
+    min-width: 52px;
+  }
+
+  .info-value {
+    color: #1a1a2e;
+    font-weight: bold;
+  }
+
+  .address-row {
+    font-size: 10px;
+    color: #333;
+    line-height: 1.5;
+    margin-top: 3px;
+  }
+
+  .address-label {
+    font-weight: bold;
+    color: #555;
+  }
+
+  .aadhaar-number-section {
+    background: linear-gradient(90deg, #1a3a8f, #0d2b6e);
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .aadhaar-number-label {
+    color: rgba(255,255,255,0.75);
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .aadhaar-number {
+    color: #FFD700;
+    font-size: 22px;
+    font-weight: bold;
+    letter-spacing: 6px;
+    font-family: 'Courier New', monospace;
+  }
+
+  .card-footer {
+    background: #f5f7ff;
+    padding: 6px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #dde3f5;
+  }
+
+  .uidai-text {
+    font-size: 8px;
+    color: #888;
+    letter-spacing: 1px;
+  }
+
+  .uidai-url {
+    font-size: 8px;
+    color: #1a3a8f;
+    font-weight: bold;
+  }
+
+  /* ── BACK SIDE ── */
+  .card-back {
+    margin-top: 20px;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%);
+    border: 2px solid #d0d8f0;
+  }
+
+  .back-header {
+    background: linear-gradient(90deg, #1a3a8f, #0d2b6e);
+    padding: 8px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .back-header-title {
+    color: #FFD700;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+
+  .back-body {
+    padding: 14px;
+    display: flex;
+    gap: 16px;
+  }
+
+  .qr-box {
+    width: 90px;
+    height: 90px;
+    border: 2px solid #1a3a8f;
+    border-radius: 6px;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: #333;
+    flex-shrink: 0;
+    padding: 6px;
+  }
+
+  .qr-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 1.5px;
+    width: 60px;
+    height: 60px;
+    margin-bottom: 4px;
+  }
+
+  .qr-cell {
+    background: #000;
+    border-radius: 1px;
+  }
+
+  .qr-cell.white { background: white; }
+
+  .back-info { flex: 1; }
+
+  .back-address-title {
+    font-size: 10px;
+    font-weight: bold;
+    color: #1a3a8f;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .back-address-text {
+    font-size: 11px;
+    color: #222;
+    line-height: 1.6;
+  }
+
+  .signature-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 12px;
+    padding-right: 10px;
+  }
+
+  .signature-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .signature-line {
+    width: 80px;
+    border-bottom: 1.5px solid #333;
+    margin-bottom: 3px;
+  }
+
+  .signature-label {
+    font-size: 8px;
+    color: #555;
+    letter-spacing: 0.5px;
+  }
+
+  .test-banner {
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(255,0,0,0.05) 10px,
+      rgba(255,0,0,0.05) 20px
+    );
+    border: 1.5px dashed #ff4444;
+    color: #cc0000;
+    text-align: center;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    padding: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="watermark-label">⚠️ DUMMY / SPECIMEN — FOR TESTING ONLY — NOT A REAL DOCUMENT</div>
+
+<!-- ════════════════════════════════════════════
+     AADHAAR CARD — FRONT
+════════════════════════════════════════════ -->
+<div class="aadhaar-card">
+
+  <div class="test-banner">SPECIMEN — FAKE — TESTING ONLY — NOT VALID</div>
+
+  <div class="card-front">
+
+    <!-- Header -->
+    <div class="card-header">
+      <div class="emblem">🇮🇳</div>
+      <div class="header-text-block">
+        <span class="govt-text">भारत सरकार | GOVERNMENT OF INDIA</span>
+        <span class="aadhaar-title">Aadhaar</span>
+        <span class="aadhaar-hindi">आधार</span>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="card-body">
+      <div class="photo-box">
+        👤
+        <span class="photo-label">PHOTO</span>
+      </div>
+      <div class="card-info">
+        <div class="name-row">RAJU TESTNAME</div>
+
+        <div class="info-row">
+          <span class="info-label">DOB:</span>
+          <span class="info-value">15/08/1990</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Gender:</span>
+          <span class="info-value">Male</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Mobile:</span>
+          <span class="info-value">9654785890</span>
+        </div>
+
+        <div class="address-row">
+          <span class="address-label">Address: </span>
+          42, Test Nagar, Demo Colony,
+          Mumbai - 400001,
+          Maharashtra, INDIA
+        </div>
+      </div>
+    </div>
+
+    <!-- Aadhaar Number -->
+    <div class="aadhaar-number-section">
+      <span class="aadhaar-number-label">Unique Identification Number</span>
+      <span class="aadhaar-number">5648 5678 6002</span>
+    </div>
+
+    <!-- Footer -->
+    <div class="card-footer">
+      <span class="uidai-text">Unique Identification Authority of India | UIDAI</span>
+      <span class="uidai-url">uidai.gov.in</span>
+    </div>
+
+  </div><!-- end card-front -->
+
+  <!-- ════ BACK SIDE ════ -->
+  <div class="card-back">
+
+    <div class="back-header">
+      <span class="back-header-title">Aadhaar — आधार</span>
+      <span style="color:rgba(255,255,255,0.6); font-size:9px;">UIDAI · uidai.gov.in</span>
+    </div>
+
+    <div class="back-body">
+
+      <!-- Fake QR code grid -->
+      <div class="qr-box">
+        <div class="qr-grid">
+          <!-- Row 1 -->
+          <div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell"></div>
+          <div class="qr-cell white"></div><div class="qr-cell"></div><div class="qr-cell white"></div>
+          <!-- Row 2 -->
+          <div class="qr-cell white"></div><div class="qr-cell"></div><div class="qr-cell white"></div>
+          <div class="qr-cell"></div><div class="qr-cell white"></div><div class="qr-cell"></div>
+          <!-- Row 3 -->
+          <div class="qr-cell"></div><div class="qr-cell white"></div><div class="qr-cell"></div>
+          <div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell white"></div>
+          <!-- Row 4 -->
+          <div class="qr-cell white"></div><div class="qr-cell"></div><div class="qr-cell white"></div>
+          <div class="qr-cell white"></div><div class="qr-cell"></div><div class="qr-cell"></div>
+          <!-- Row 5 -->
+          <div class="qr-cell"></div><div class="qr-cell"></div><div class="qr-cell white"></div>
+          <div class="qr-cell"></div><div class="qr-cell white"></div><div class="qr-cell"></div>
+          <!-- Row 6 -->
+          <div class="qr-cell white"></div><div class="qr-cell"></div><div class="qr-cell"></div>
+          <div class="qr-cell white"></div><div class="qr-cell"></div><div class="qr-cell white"></div>
+        </div>
+        <span>Scan QR</span>
+      </div>
+
+      <div class="back-info">
+        <div class="back-address-title">Registered Address</div>
+        <div class="back-address-text">
+          42, Test Nagar,<br>
+          Demo Colony, Near Sample Chowk,<br>
+          Mumbai - 400001,<br>
+          Maharashtra, INDIA
+        </div>
+        <div class="signature-row">
+          <div class="signature-box">
+            <div class="signature-line"></div>
+            <span class="signature-label">SIGNATURE / THUMB</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end back-body -->
+
+    <div class="test-banner">SPECIMEN — NOT A REAL AADHAAR — FOR OCR TESTING ONLY</div>
+
+  </div><!-- end card-back -->
+
+</div><!-- end aadhaar-card -->
+
+
+<!-- ════════════════════════════════════════════
+     ELECTRICITY BILL
+════════════════════════════════════════════ -->
+
+<div class="watermark-label" style="margin-top:30px;">⚠️ DUMMY ELECTRICITY BILL — FOR TESTING ONLY</div>
+
+<div style="
+  width: 480px;
+  background: white;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+">
+
+  <!-- Bill Header -->
+  <div style="background: linear-gradient(90deg, #1a5276, #154360); padding: 14px 18px; display:flex; justify-content:space-between; align-items:center;">
+    <div>
+      <div style="color:#FFD700; font-size:16px; font-weight:bold; letter-spacing:1px;">⚡ MSEDCL</div>
+      <div style="color:rgba(255,255,255,0.8); font-size:9px; margin-top:2px;">Maharashtra State Electricity Distribution Co. Ltd.</div>
+      <div style="color:rgba(255,255,255,0.6); font-size:8px;">A Government of Maharashtra Undertaking</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="color:white; font-size:11px; font-weight:bold;">ELECTRICITY BILL</div>
+      <div style="color:rgba(255,255,255,0.7); font-size:9px; margin-top:3px;">Bill No: TEST-2026-04-00123</div>
+      <div style="color:rgba(255,255,255,0.7); font-size:9px;">Bill Date: 01/05/2026</div>
+    </div>
+  </div>
+
+  <!-- Test Banner -->
+  <div style="background:repeating-linear-gradient(45deg,transparent,transparent 8px,rgba(255,0,0,0.06) 8px,rgba(255,0,0,0.06) 16px); border-top:1.5px dashed #ff4444; border-bottom:1.5px dashed #ff4444; color:#cc0000; text-align:center; font-size:9px; font-weight:bold; letter-spacing:2px; padding:3px;">
+    SPECIMEN — DUMMY BILL — FOR TESTING PURPOSES ONLY — NOT A REAL DOCUMENT
+  </div>
+
+  <!-- Consumer Info -->
+  <div style="padding:14px 18px; display:grid; grid-template-columns:1fr 1fr; gap:10px; background:#f8faff; border-bottom:1px solid #dde;">
+
+    <div>
+      <div style="font-size:9px; color:#777; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:2px;">Consumer Name</div>
+      <div style="font-weight:bold; color:#1a1a2e; font-size:13px;">RAJU TESTNAME</div>
+    </div>
+
+    <div>
+      <div style="font-size:9px; color:#777; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:2px;">Consumer Number</div>
+      <div style="font-weight:bold; color:#1a3a8f; font-size:13px; font-family:monospace;">TEST-9876543210</div>
+    </div>
+
+    <div>
+      <div style="font-size:9px; color:#777; text-transform:uppercase; margin-bottom:2px;">Account Number</div>
+      <div style="font-weight:bold; font-family:monospace;">ACC-00112233445</div>
+    </div>
+
+    <div>
+      <div style="font-size:9px; color:#777; text-transform:uppercase; margin-bottom:2px;">Tariff Category</div>
+      <div style="font-weight:bold;">LT-1 Residential</div>
+    </div>
+
+    <div>
+      <div style="font-size:9px; color:#777; text-transform:uppercase; margin-bottom:2px;">Meter Number</div>
+      <div style="font-weight:bold; font-family:monospace;">MTR-55667788</div>
+    </div>
+
+    <div>
+      <div style="font-size:9px; color:#777; text-transform:uppercase; margin-bottom:2px;">Division / Sub-Division</div>
+      <div style="font-weight:bold;">Mumbai Urban / MU-04</div>
+    </div>
+
+  </div>
+
+  <!-- Address -->
+  <div style="padding:10px 18px; background:#fff; border-bottom:1px solid #eee;">
+    <div style="font-size:9px; color:#777; text-transform:uppercase; margin-bottom:3px;">Service Address</div>
+    <div style="color:#222; line-height:1.6;">42, Test Nagar, Demo Colony, Near Sample Chowk,<br>Mumbai - 400001, Maharashtra</div>
+  </div>
+
+  <!-- Billing Period + Meter Reading -->
+  <div style="padding:12px 18px; background:#f0f4ff; border-bottom:1px solid #dde;">
+    <div style="font-weight:bold; font-size:11px; color:#1a3a8f; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Billing Period & Meter Reading</div>
+    <table style="width:100%; border-collapse:collapse; font-size:11px;">
+      <thead>
+        <tr style="background:#dde8ff;">
+          <th style="padding:5px 8px; text-align:left; border:1px solid #bcc8e8; font-size:10px;">Bill Period</th>
+          <th style="padding:5px 8px; text-align:center; border:1px solid #bcc8e8; font-size:10px;">Previous Reading</th>
+          <th style="padding:5px 8px; text-align:center; border:1px solid #bcc8e8; font-size:10px;">Current Reading</th>
+          <th style="padding:5px 8px; text-align:center; border:1px solid #bcc8e8; font-size:10px;">Units Consumed (kWh)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:6px 8px; border:1px solid #ccd6ee;">01/04/2026 – 30/04/2026</td>
+          <td style="padding:6px 8px; border:1px solid #ccd6ee; text-align:center; font-family:monospace;">04276</td>
+          <td style="padding:6px 8px; border:1px solid #ccd6ee; text-align:center; font-family:monospace;">04521</td>
+          <td style="padding:6px 8px; border:1px solid #ccd6ee; text-align:center; font-weight:bold; color:#1a3a8f;">245 kWh</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Charges Breakdown -->
+  <div style="padding:12px 18px; background:#fff; border-bottom:1px solid #eee;">
+    <div style="font-weight:bold; font-size:11px; color:#1a3a8f; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Charges Breakdown</div>
+    <table style="width:100%; border-collapse:collapse; font-size:11px;">
+      <tr style="background:#f8faff;">
+        <td style="padding:5px 8px; border:1px solid #eee;">Energy Charges (245 units × ₹7.50)</td>
+        <td style="padding:5px 8px; border:1px solid #eee; text-align:right;">₹1,837.50</td>
+      </tr>
+      <tr>
+        <td style="padding:5px 8px; border:1px solid #eee;">Fixed / Demand Charges</td>
+        <td style="padding:5px 8px; border:1px solid #eee; text-align:right;">₹120.00</td>
+      </tr>
+      <tr style="background:#f8faff;">
+        <td style="padding:5px 8px; border:1px solid #eee;">Fuel Adjustment Charges</td>
+        <td style="padding:5px 8px; border:1px solid #eee; text-align:right;">₹48.00</td>
+      </tr>
+      <tr>
+        <td style="padding:5px 8px; border:1px solid #eee;">GST (18%)</td>
+        <td style="padding:5px 8px; border:1px solid #eee; text-align:right;">₹360.69</td>
+      </tr>
+      <tr style="background:#fff8dc;">
+        <td style="padding:7px 8px; border:1px solid #eee; font-weight:bold; font-size:13px;">Total Amount Due</td>
+        <td style="padding:7px 8px; border:1px solid #eee; text-align:right; font-weight:bold; font-size:14px; color:#c0392b;">₹2,366.19</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Due Date + Payment -->
+  <div style="padding:12px 18px; background:#fff8dc; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+    <div>
+      <div style="font-size:10px; color:#777; margin-bottom:2px;">Due Date</div>
+      <div style="font-weight:bold; color:#c0392b; font-size:14px;">20/05/2026</div>
+      <div style="font-size:9px; color:#888; margin-top:2px;">Late payment surcharge: 2% after due date</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:10px; color:#777; margin-bottom:2px;">Pay Via</div>
+      <div style="font-size:10px; color:#333; line-height:1.6;">UPI · Net Banking · MSEDCL App<br>Cheque in favour of MSEDCL</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="padding:10px 18px; background:#1a5276; display:flex; justify-content:space-between; align-items:center;">
+    <div style="color:rgba(255,255,255,0.7); font-size:9px;">Helpline: 1800-102-3435 | msedcl.in</div>
+    <div style="color:rgba(255,255,255,0.5); font-size:8px; letter-spacing:1px;">SPECIMEN DOCUMENT — NOT VALID</div>
+  </div>
+
+</div>
+
+<div class="watermark-label" style="margin-bottom:30px;">⚠️ ALL DOCUMENTS ABOVE ARE FAKE — FOR SOFTWARE TESTING ONLY</div>
+
+</body>
+</html>

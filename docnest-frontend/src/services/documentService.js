@@ -7,13 +7,15 @@ export const documentService = {
   /** Backward-compat: get by client ID */
   getByClient: (clientId) => api.get(`/documents/client/${clientId}`),
 
-  /** Upload document for any owner */
-  upload: (ownerType, ownerId, documentType, file) => {
+  /** Upload document for any owner — now includes optional OCR data */
+  upload: (ownerType, ownerId, documentType, file, ocrText, confidence) => {
     const form = new FormData()
     form.append('ownerType', ownerType)
     form.append('ownerId', ownerId)
     if (documentType) form.append('documentType', documentType)
     form.append('file', file)
+    if (ocrText) form.append('ocrText', ocrText)
+    if (confidence != null) form.append('confidence', confidence)
     return api.post('/documents/upload', form, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })

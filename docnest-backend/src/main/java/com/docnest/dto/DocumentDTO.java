@@ -17,6 +17,9 @@ public class DocumentDTO {
     private String documentType;
     private String fileName;
     private String filePath;
+    private String mimeType;
+    private Long fileSize;
+    private Integer ocrConfidence;
     private LocalDateTime uploadDate;
     private String previewUrl;
 }
