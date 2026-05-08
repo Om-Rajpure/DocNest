@@ -2,10 +2,10 @@ import api from './api'
 
 export const documentService = {
   /** Get documents by owner type (CLIENT or FAMILY_MEMBER) */
-  getByOwner: (ownerType, ownerId) => api.get(`/documents/owner/${ownerType}/${ownerId}`),
+  getByOwner: (ownerType, ownerId) => api.get(`/api/documents/owner/${ownerType}/${ownerId}`),
 
   /** Backward-compat: get by client ID */
-  getByClient: (clientId) => api.get(`/documents/client/${clientId}`),
+  getByClient: (clientId) => api.get(`/api/documents/client/${clientId}`),
 
   /** Upload document for any owner — now includes optional OCR data */
   upload: (ownerType, ownerId, documentType, file, ocrText, confidence) => {
@@ -16,7 +16,7 @@ export const documentService = {
     form.append('file', file)
     if (ocrText) form.append('ocrText', ocrText)
     if (confidence != null) form.append('confidence', confidence)
-    return api.post('/documents/upload', form, {
+    return api.post('/api/documents/upload', form, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
   },
@@ -24,15 +24,15 @@ export const documentService = {
   replace: (documentId, file) => {
     const form = new FormData()
     form.append('file', file)
-    return api.put(`/documents/replace/${documentId}`, form, {
+    return api.put(`/api/documents/replace/${documentId}`, form, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
   },
 
-  delete: (documentId) => api.delete(`/documents/${documentId}`),
+  delete: (documentId) => api.delete(`/api/documents/${documentId}`),
 
   /** Get document completion stats */
-  getCompletion: (ownerType, ownerId) => api.get(`/documents/completion/${ownerType}/${ownerId}`),
+  getCompletion: (ownerType, ownerId) => api.get(`/api/documents/completion/${ownerType}/${ownerId}`),
 
-  getPreviewUrl: (documentId) => `/api/documents/preview/${documentId}`,
+  getPreviewUrl: (documentId) => `${import.meta.env.VITE_API_URL}/api/documents/preview/${documentId}`,
 }

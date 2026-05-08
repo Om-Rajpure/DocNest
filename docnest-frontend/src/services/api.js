@@ -1,56 +1,49 @@
-import axios from 'axios'
+import axios from 'axios';
 
-const api = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL || ''}/api`,
-  headers: { 'Content-Type': 'application/json' },
-  timeout: 60000,
-})
+const API = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+  withCredentials: true,
+  timeout: 60000, // 60s to handle Render cold starts
+});
 
-// Request interceptor — attach JWT token + log
-api.interceptors.request.use(
+// Request interceptor — attach JWT token
+API.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('docnest_token')
+    const token = localStorage.getItem('docnest_token');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    return config
+    return config;
   },
   (error) => Promise.reject(error)
-)
+);
 
-// Response interceptor — detailed error messages + auth handling
-api.interceptors.response.use(
+// Response interceptor — global error handling
+API.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response) {
-      const status = error.response.status
-      const data = error.response.data
+      const { status, data } = error.response;
 
-      // Handle Authentication Failures
       if (status === 401 || status === 403) {
         console.warn('[API] Auth failed, clearing session');
         localStorage.removeItem('docnest_token');
-        // Optional: redirect to login if not already there
         if (!window.location.pathname.includes('/login')) {
           window.location.href = '/login?expired=true';
         }
       }
 
-      console.error(`[API Error] ${status}:`, data)
-
-      let message = data?.error || data?.message || ''
-      if (status === 400) message = message || 'Invalid data. Please check all fields.'
-      else if (status === 404) message = 'Resource not found.'
-      else if (status === 500) message = message || 'Server error. Check backend logs.'
-      else message = message || `Request failed (${status})`
-
-      return Promise.reject(new Error(message))
+      const message = data?.message || data?.error || `Request failed (${status})`;
+      return Promise.reject(new Error(message));
     } else if (error.request) {
-      console.error('[API Error] No response — is the backend running?')
-      return Promise.reject(new Error('Cannot reach server. Make sure the backend is running.'))
+      // Handle Render cold starts and network errors
+      if (error.code === 'ECONNABORTED') {
+        return Promise.reject(new Error('Server waking up, please wait...'));
+      }
+      return Promise.reject(new Error('Connection lost. Please check your internet.'));
     }
-    return Promise.reject(new Error(error.message || 'Something went wrong'))
+    return Promise.reject(new Error(error.message || 'Something went wrong'));
   }
-)
+);
 
-export default api
+export default API;

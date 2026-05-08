@@ -1,5 +1,5 @@
 import api from './api'
 
 export const dashboardService = {
-  getStats: () => api.get('/dashboard/stats'),
+  getStats: () => api.get('/api/dashboard/stats'),
 }
