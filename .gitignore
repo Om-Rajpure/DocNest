@@ -8,12 +8,16 @@ docnest-frontend/dist/
 docnest-frontend/.env
 docnest-frontend/.env.local
 docnest-frontend/.env.*.local
+docnest-frontend/.env.production
+docnest-frontend/.env.development
 
 # ---------- Backend (Spring Boot / Maven) ----------
 docnest-backend/target/
 docnest-backend/.mvn/wrapper/maven-wrapper.jar
 docnest-backend/*.jar
 docnest-backend/.env
+docnest-backend/application-local.properties
+docnest-backend/src/main/resources/application-local.properties
 
 # ---------- Uploads (runtime files) ----------
 docnest-backend/uploads/
