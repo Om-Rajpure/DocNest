@@ -2,10 +2,12 @@ package com.docnest.service;
 
 import com.docnest.dto.*;
 import com.docnest.entity.User;
+import com.docnest.exception.ResourceNotFoundException;
 import com.docnest.repository.UserRepository;
 import com.docnest.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,12 +22,12 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already registered");
+            throw new IllegalArgumentException("Email already registered");
         }
 
         if (request.getConfirmPassword() != null
                 && !request.getPassword().equals(request.getConfirmPassword())) {
-            throw new RuntimeException("Passwords do not match");
+            throw new IllegalArgumentException("Passwords do not match");
         }
 
         User user = new User();
@@ -54,12 +56,16 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+            );
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException("Invalid email or password");
+        }
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         String token = jwtUtil.generateToken(user.getEmail());
 
@@ -73,17 +79,23 @@ public class AuthService {
     }
 
     public UserDTO getCurrentUser(String bearerToken) {
-        String token = bearerToken.replace("Bearer ", "");
-        String email = jwtUtil.extractEmail(token);
+        try {
+            String token = bearerToken.replace("Bearer ", "");
+            String email = jwtUtil.extractEmail(token);
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        return UserDTO.builder()
-                .id(user.getId())
-                .fullName(user.getFullName())
-                .email(user.getEmail())
-                .role(user.getRole().name())
-                .build();
+            return UserDTO.builder()
+                    .id(user.getId())
+                    .fullName(user.getFullName())
+                    .email(user.getEmail())
+                    .role(user.getRole().name())
+                    .build();
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SecurityException("Invalid or expired token");
+        }
     }
 }
