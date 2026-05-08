@@ -50,10 +50,10 @@ export default function DashboardPage() {
       {/* Stat Cards */}
       <Grid container spacing={3} sx={{ mb: 5 }}>
         {[
-          { title: 'Total Clients',  value: stats?.totalClients,           icon: <MdPeople size={20} />,        color: '#4F46E5', sub: 'Active profiles' },
-          { title: 'Family Units',   value: stats?.totalFamilies,          icon: <MdFamilyRestroom size={20} />, color: '#8B5CF6', sub: 'Group records' },
-          { title: 'Documents',      value: stats?.totalDocuments,         icon: <MdFolder size={20} />,         color: '#10B981', sub: 'Stored files' },
-          { title: 'Action Needed',  value: stats?.missingDocumentClients, icon: <MdWarning size={20} />,        color: '#F59E0B', sub: 'Missing docs' },
+          { title: 'Total Clients',   value: stats?.totalClients,           icon: <MdPeople size={20} />,        color: '#4F46E5', sub: 'Active profiles' },
+          { title: 'Family Members',  value: stats?.totalFamilyMembers ?? stats?.totalFamilies, icon: <MdFamilyRestroom size={20} />, color: '#8B5CF6', sub: 'Linked members' },
+          { title: 'Documents',       value: stats?.totalDocuments,         icon: <MdFolder size={20} />,         color: '#10B981', sub: 'Stored files' },
+          { title: 'Action Needed',   value: stats?.missingDocumentClients, icon: <MdWarning size={20} />,        color: '#F59E0B', sub: 'Missing docs' },
         ].map((card, i) => (
           <Grid item xs={6} sm={6} md={3} key={i}>
             {loading ? <SkeletonCard /> : <StatCard {...card} />}

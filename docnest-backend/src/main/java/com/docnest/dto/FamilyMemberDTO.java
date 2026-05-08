@@ -17,4 +17,6 @@ public class FamilyMemberDTO {
     private LocalDate dob;
     private String gender;
     private String mobile;
+    private String email;
+    private long documentCount;
 }

@@ -14,6 +14,7 @@ public class DashboardStatsDTO {
     private long totalClients;
     private long totalFamilies;
     private long totalDocuments;
+    private long totalFamilyMembers;
     private long missingDocumentClients;
     private long recentClientsThisMonth;
 

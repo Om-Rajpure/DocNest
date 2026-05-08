@@ -35,4 +35,7 @@ public class FamilyMember {
 
     @Column(name = "mobile", length = 15)
     private String mobile;
+
+    @Column(name = "email", length = 150)
+    private String email;
 }

@@ -10,24 +10,21 @@ import Button from '@mui/material/Button'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import Avatar from '@mui/material/Avatar'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
-import { MdEdit, MdSave, MdFolder, MdAccountTree, MdAdd, MdDelete, MdArrowBack, MdLocationOn, MdPhone } from 'react-icons/md'
+import Chip from '@mui/material/Chip'
+import CircularProgress from '@mui/material/CircularProgress'
+import { MdEdit, MdSave, MdFolder, MdAccountTree, MdAdd, MdDelete, MdArrowBack, MdLocationOn, MdPhone, MdOpenInNew } from 'react-icons/md'
 import { toast } from 'react-toastify'
 import { clientService } from '../services/clientService'
 import { documentService } from '../services/documentService'
 import { familyService } from '../services/familyService'
 import { locationService } from '../services/locationService'
-import { getInitials, avatarColor, getFullName, formatDate, docTypeLabel } from '../utils/formatters'
+import { getInitials, avatarColor, getFullName, formatDate } from '../utils/formatters'
 import { isValidMobile } from '../utils/validators'
-import DocumentCard from '../components/document/DocumentCard'
-import DocumentPreviewModal from '../components/document/DocumentPreviewModal'
-import DropzoneUpload from '../components/document/DropzoneUpload'
+import FamilyMemberCard from '../components/family/FamilyMemberCard'
 import FamilyMemberForm from '../components/family/FamilyMemberForm'
+import DocumentPreviewModal from '../components/document/DocumentPreviewModal'
 import ConfirmModal from '../components/ui/ConfirmModal'
 import Badge from '../components/ui/Badge'
 import Spinner from '../components/ui/Spinner'
@@ -46,12 +43,8 @@ export default function ClientDetailPage() {
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState({})
 
-  const [docs, setDocs] = useState([])
+  const [completion, setCompletion] = useState({ uploaded: 0, total: 4, percentage: 0 })
   const [previewDoc, setPreviewDoc] = useState(null)
-  const [uploadOpen, setUploadOpen] = useState(false)
-  const [uploadType, setUploadType] = useState('')
-  const [replaceId, setReplaceId] = useState(null)
-  const [uploading, setUploading] = useState(false)
 
   const [members, setMembers] = useState([])
   const [familyFormOpen, setFamilyFormOpen] = useState(false)
@@ -67,8 +60,11 @@ export default function ClientDetailPage() {
     finally { setLoading(false) }
   }
 
-  const loadDocs = async () => {
-    try { const r = await documentService.getByClient(id); setDocs(r.data) } catch {}
+  const loadCompletion = async () => {
+    try {
+      const r = await documentService.getCompletion('CLIENT', id)
+      setCompletion(r.data)
+    } catch {}
   }
 
   const loadFamily = async () => {
@@ -77,7 +73,7 @@ export default function ClientDetailPage() {
 
   useEffect(() => {
     loadClient()
-    loadDocs()
+    loadCompletion()
     loadFamily()
     locationService.getAll().then(r => setLocations(r.data)).catch(() => {})
   }, [id])
@@ -102,24 +98,6 @@ export default function ClientDetailPage() {
     finally { setSaving(false) }
   }
 
-  const handleUpload = (type, docId) => {
-    setUploadType(type)
-    setReplaceId(docId)
-    setUploadOpen(true)
-  }
-
-  const handleFileSelected = async (file) => {
-    setUploading(true)
-    try {
-      if (replaceId) await documentService.replace(replaceId, file)
-      else await documentService.upload(id, uploadType, file)
-      toast.success(replaceId ? 'Document replaced' : 'Document uploaded')
-      setUploadOpen(false)
-      loadDocs()
-    } catch (e) { toast.error(e.message) }
-    finally { setUploading(false) }
-  }
-
   const handleDeleteMember = async () => {
     try {
       await familyService.delete(deleteMemberId)
@@ -134,6 +112,7 @@ export default function ClientDetailPage() {
 
   const initials = getInitials(client.firstName, client.lastName)
   const color = avatarColor(getFullName(client))
+  const pct = completion.percentage || 0
 
   return (
     <Box className="page-enter">
@@ -156,14 +135,14 @@ export default function ClientDetailPage() {
         </Box>
         <Box sx={{ display: 'flex', gap: 1.5 }}>
           <Button variant="outlined" startIcon={<MdArrowBack />} onClick={() => navigate('/clients')}>Back</Button>
-          <Button variant="contained" startIcon={<MdAccountTree />} onClick={() => navigate(`/family/${id}`)}>Family Tree</Button>
+          <Button variant="contained" startIcon={<MdFolder />} onClick={() => navigate(`/clients/${id}/documents`)}>Document Center</Button>
+          <Button variant="outlined" startIcon={<MdAccountTree />} onClick={() => navigate(`/family/${id}`)}>Family Tree</Button>
         </Box>
       </Box>
 
       {/* Tabs */}
       <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 5, borderBottom: '1px solid var(--border)' }}>
         <Tab label="Overview" />
-        <Tab label={`Documents (${docs.length})`} />
         <Tab label={`Family (${members.length})`} />
       </Tabs>
 
@@ -209,34 +188,38 @@ export default function ClientDetailPage() {
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                 {[
                   { label: 'Member Since', value: formatDate(client.createdAt) },
-                  { label: 'Active Documents', value: `${docs.length} uploaded files` },
-                  { label: 'Family Strength', value: `${members.length + 1} total members` },
+                  { label: 'Family Members', value: `${members.length} linked` },
                 ].map((s, i) => (
                   <Box key={i}>
                     <Typography variant="caption" sx={{ color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', fontSize: '0.6rem', letterSpacing: '0.05em' }}>{s.label}</Typography>
                     <Typography variant="body1" sx={{ fontWeight: 600, color: 'var(--text-primary)' }}>{s.value}</Typography>
                   </Box>
                 ))}
+                {/* Document Completion Mini */}
+                <Box>
+                  <Typography variant="caption" sx={{ color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', fontSize: '0.6rem', letterSpacing: '0.05em' }}>Documents</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 0.5 }}>
+                    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                      <CircularProgress variant="determinate" value={pct} size={40} thickness={4} sx={{ color: pct === 100 ? '#059669' : '#4F46E5' }} />
+                      <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.6rem' }}>{pct}%</Typography>
+                      </Box>
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--text-primary)' }}>{completion.uploaded}/{completion.total} uploaded</Typography>
+                      <Button size="small" endIcon={<MdOpenInNew size={12} />} onClick={() => navigate(`/clients/${id}/documents`)} sx={{ p: 0, minWidth: 0, fontWeight: 600, fontSize: '0.7rem', mt: 0.25 }}>Manage Documents</Button>
+                    </Box>
+                  </Box>
+                </Box>
               </Box>
             </Card>
           </Grid>
         </Grid>
       )}
 
-      {/* Tab 1: Documents */}
+      {/* Tab 1: Family */}
       {tab === 1 && (
-        <Card sx={{ p: 4 }}>
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="h6">Documents</Typography>
-            <Typography variant="body2" sx={{ color: 'var(--text-secondary)' }}>Secure storage for all legal and identity documents.</Typography>
-          </Box>
-          <DocumentCard clientId={id} documents={docs} onRefresh={loadDocs} onPreview={setPreviewDoc} onUpload={handleUpload} />
-        </Card>
-      )}
-
-      {/* Tab 2: Family */}
-      {tab === 2 && (
-        <Card sx={{ p: 4 }}>
+        <Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, alignItems: 'center' }}>
             <Box>
               <Typography variant="h6">Family Members</Typography>
@@ -245,42 +228,27 @@ export default function ClientDetailPage() {
             <Button variant="contained" startIcon={<MdAdd />} onClick={() => { setEditMember(null); setFamilyFormOpen(true) }}>Add Member</Button>
           </Box>
           {members.length === 0 ? (
-            <Box sx={{ textAlign: 'center', py: 8, background: 'var(--surface-2)', borderRadius: 'var(--radius)', border: '1px dashed var(--border-strong)' }}>
+            <Card sx={{ textAlign: 'center', py: 8, background: 'var(--surface-2)', border: '1px dashed var(--border-strong)' }}>
               <Typography variant="body2" sx={{ color: 'var(--text-muted)', fontWeight: 500 }}>No family members added yet.</Typography>
-            </Box>
+            </Card>
           ) : (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
               {members.map(m => (
-                <Box key={m.id} sx={{ 
-                  display: 'flex', alignItems: 'center', gap: 2.5, p: 2, borderRadius: 'var(--radius-sm)', 
-                  border: '1px solid var(--border)', transition: 'all 0.15s', 
-                  '&:hover': { background: 'var(--surface-2)', borderColor: 'var(--border-strong)' } 
-                }}>
-                  <Avatar sx={{ bgcolor: avatarColor(m.memberName), width: 40, height: 40, fontSize: '0.85rem', fontWeight: 700, fontFamily: 'var(--font-heading)' }}>{m.memberName?.charAt(0)}</Avatar>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'var(--text-primary)' }}>{m.memberName}</Typography>
-                    <Typography variant="caption" sx={{ color: 'var(--text-muted)' }}>{m.relation} {m.dob ? `· ${formatDate(m.dob)}` : ''}</Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', gap: 0.5 }}>
-                    <Tooltip title="Edit"><IconButton size="small" onClick={() => { setEditMember(m); setFamilyFormOpen(true) }} sx={{ color: 'var(--primary)' }}><MdEdit size={16} /></IconButton></Tooltip>
-                    <Tooltip title="Remove"><IconButton size="small" onClick={() => setDeleteMemberId(m.id)} sx={{ color: 'var(--danger)' }}><MdDelete size={16} /></IconButton></Tooltip>
-                  </Box>
-                </Box>
+                <FamilyMemberCard
+                  key={m.id}
+                  member={m}
+                  onEdit={(mem) => { setEditMember(mem); setFamilyFormOpen(true) }}
+                  onDelete={(memId) => setDeleteMemberId(memId)}
+                  onPreview={setPreviewDoc}
+                />
               ))}
             </Box>
           )}
-        </Card>
+        </Box>
       )}
 
       {/* Modals */}
       <DocumentPreviewModal open={!!previewDoc} document={previewDoc} onClose={() => setPreviewDoc(null)} />
-      <Dialog open={uploadOpen} onClose={() => setUploadOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 600, fontFamily: 'var(--font-heading)' }}>Upload {docTypeLabel(uploadType)}</DialogTitle>
-        <DialogContent><DropzoneUpload onFileSelected={handleFileSelected} uploading={uploading} progress={uploading ? 80 : 0} /></DialogContent>
-        <DialogActions sx={{ p: 3, pt: 0 }}>
-          <Button onClick={() => setUploadOpen(false)} variant="outlined">Cancel</Button>
-        </DialogActions>
-      </Dialog>
       {familyFormOpen && <FamilyMemberForm open={familyFormOpen} onClose={() => setFamilyFormOpen(false)} clientId={Number(id)} member={editMember} onSaved={loadFamily} />}
       <ConfirmModal open={!!deleteMemberId} title="Remove Family Member" message="Are you sure? This action cannot be undone." onConfirm={handleDeleteMember} onCancel={() => setDeleteMemberId(null)} />
     </Box>

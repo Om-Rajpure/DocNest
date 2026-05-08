@@ -108,10 +108,10 @@ public class ClientService {
     }
 
     public ClientDTO toDTO(Client client) {
-        long docCount = documentRepository.countByClientId(client.getId());
+        long docCount = documentRepository.countByOwnerTypeAndOwnerId("CLIENT", client.getId());
         long familyCount = familyMemberRepository.countByClientId(client.getId());
 
-        Set<String> uploadedTypes = documentRepository.findByClientId(client.getId())
+        Set<String> uploadedTypes = documentRepository.findByOwnerTypeAndOwnerId("CLIENT", client.getId())
                 .stream().map(d -> d.getDocumentType()).collect(Collectors.toSet());
         boolean hasMissing = !uploadedTypes.containsAll(REQUIRED_DOC_TYPES);
 

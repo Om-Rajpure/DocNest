@@ -1,11 +1,17 @@
 import api from './api'
 
 export const documentService = {
+  /** Get documents by owner type (CLIENT or FAMILY_MEMBER) */
+  getByOwner: (ownerType, ownerId) => api.get(`/documents/owner/${ownerType}/${ownerId}`),
+
+  /** Backward-compat: get by client ID */
   getByClient: (clientId) => api.get(`/documents/client/${clientId}`),
 
-  upload: (clientId, documentType, file) => {
+  /** Upload document for any owner */
+  upload: (ownerType, ownerId, documentType, file) => {
     const form = new FormData()
-    form.append('clientId', clientId)
+    form.append('ownerType', ownerType)
+    form.append('ownerId', ownerId)
     if (documentType) form.append('documentType', documentType)
     form.append('file', file)
     return api.post('/documents/upload', form, {
@@ -22,6 +28,9 @@ export const documentService = {
   },
 
   delete: (documentId) => api.delete(`/documents/${documentId}`),
+
+  /** Get document completion stats */
+  getCompletion: (ownerType, ownerId) => api.get(`/documents/completion/${ownerType}/${ownerId}`),
 
   getPreviewUrl: (documentId) => `/api/documents/preview/${documentId}`,
 }

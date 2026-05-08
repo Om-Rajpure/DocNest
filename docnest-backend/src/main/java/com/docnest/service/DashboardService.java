@@ -24,12 +24,13 @@ public class DashboardService {
     public DashboardStatsDTO getStats() {
         long totalClients   = clientRepository.count();
         long totalDocuments = documentRepository.count();
+        long totalFamilyMembers = familyMemberRepository.count();
         long missingDocs    = clientRepository.countClientsWithMissingDocuments();
         long recentClients  = clientRepository.countByCreatedAtAfter(
                 LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0));
 
         // Family count = unique clients that have at least one family member
-        long totalFamilies  = familyMemberRepository.count() > 0 ? totalClients : 0;
+        long totalFamilies = totalFamilyMembers > 0 ? totalClients : 0;
 
         // Documents by type
         Map<String, Long> docsByType = new LinkedHashMap<>();
@@ -41,6 +42,7 @@ public class DashboardService {
                 .totalClients(totalClients)
                 .totalFamilies(totalFamilies)
                 .totalDocuments(totalDocuments)
+                .totalFamilyMembers(totalFamilyMembers)
                 .missingDocumentClients(missingDocs)
                 .recentClientsThisMonth(recentClients)
                 .documentsByType(docsByType)

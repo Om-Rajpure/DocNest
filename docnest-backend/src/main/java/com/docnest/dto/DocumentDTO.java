@@ -11,8 +11,9 @@ import java.time.LocalDateTime;
 public class DocumentDTO {
 
     private Long id;
-    private Long clientId;
-    private String clientName;
+    private String ownerType;
+    private Long ownerId;
+    private String ownerName;
     private String documentType;
     private String fileName;
     private String filePath;

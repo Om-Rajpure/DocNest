@@ -12,19 +12,19 @@ import java.util.Optional;
 @Repository
 public interface DocumentRepository extends JpaRepository<Document, Long> {
 
-    List<Document> findByClientId(Long clientId);
+    List<Document> findByOwnerTypeAndOwnerId(String ownerType, Long ownerId);
 
-    Optional<Document> findByClientIdAndDocumentType(Long clientId, String documentType);
+    Optional<Document> findByOwnerTypeAndOwnerIdAndDocumentType(String ownerType, Long ownerId, String documentType);
 
-    boolean existsByClientIdAndDocumentType(Long clientId, String documentType);
+    boolean existsByOwnerTypeAndOwnerIdAndDocumentType(String ownerType, Long ownerId, String documentType);
 
-    long countByClientId(Long clientId);
-
-    @Query("SELECT COUNT(d) FROM Document d GROUP BY d.documentType")
-    List<Long> countByDocumentTypeGrouped();
+    long countByOwnerTypeAndOwnerId(String ownerType, Long ownerId);
 
     @Query("SELECT d.documentType, COUNT(d) FROM Document d GROUP BY d.documentType")
     List<Object[]> countByDocumentType();
 
     List<Document> findTop10ByOrderByUploadDateDesc();
+
+    @Query("SELECT COUNT(d) FROM Document d WHERE d.ownerType = 'CLIENT' AND d.ownerId = :clientId")
+    long countClientDocuments(@Param("clientId") Long clientId);
 }

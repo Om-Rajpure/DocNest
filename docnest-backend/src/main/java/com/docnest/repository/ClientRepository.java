@@ -32,9 +32,9 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     long countByCreatedAtAfter(LocalDateTime date);
 
     @Query("SELECT COUNT(DISTINCT c) FROM Client c WHERE " +
-           "NOT EXISTS (SELECT d FROM Document d WHERE d.client = c AND d.documentType = 'AADHAR') OR " +
-           "NOT EXISTS (SELECT d FROM Document d WHERE d.client = c AND d.documentType = 'PAN') OR " +
-           "NOT EXISTS (SELECT d FROM Document d WHERE d.client = c AND d.documentType = 'DRIVING_LICENSE') OR " +
-           "NOT EXISTS (SELECT d FROM Document d WHERE d.client = c AND d.documentType = 'ELECTRICITY_BILL')")
+           "NOT EXISTS (SELECT d FROM Document d WHERE d.ownerType = 'CLIENT' AND d.ownerId = c.id AND d.documentType = 'AADHAR') OR " +
+           "NOT EXISTS (SELECT d FROM Document d WHERE d.ownerType = 'CLIENT' AND d.ownerId = c.id AND d.documentType = 'PAN') OR " +
+           "NOT EXISTS (SELECT d FROM Document d WHERE d.ownerType = 'CLIENT' AND d.ownerId = c.id AND d.documentType = 'DRIVING_LICENSE') OR " +
+           "NOT EXISTS (SELECT d FROM Document d WHERE d.ownerType = 'CLIENT' AND d.ownerId = c.id AND d.documentType = 'ELECTRICITY_BILL')")
     long countClientsWithMissingDocuments();
 }

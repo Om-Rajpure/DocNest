@@ -13,7 +13,7 @@ import { familyService } from '../../services/familyService'
 
 const RELATIONS = ['Spouse', 'Child', 'Parent', 'Sibling', 'Grandparent', 'Other']
 const GENDERS   = ['Male', 'Female', 'Other']
-const EMPTY = { memberName: '', relation: '', dob: '', gender: '', mobile: '' }
+const EMPTY = { memberName: '', relation: '', dob: '', gender: '', mobile: '', email: '' }
 
 export default function FamilyMemberForm({ open, onClose, clientId, member, onSaved }) {
   const isEdit = !!member?.id
@@ -84,6 +84,9 @@ export default function FamilyMemberForm({ open, onClose, clientId, member, onSa
           <Grid item xs={12} sm={6}>
             <TextField fullWidth label="Mobile" value={form.mobile} onChange={set('mobile')}
               error={!!errors.mobile} helperText={errors.mobile} />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField fullWidth label="Email (Optional)" type="email" value={form.email || ''} onChange={set('email')} />
           </Grid>
         </Grid>
       </DialogContent>

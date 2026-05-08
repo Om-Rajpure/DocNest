@@ -6,6 +6,7 @@ import com.docnest.entity.Client;
 import com.docnest.entity.FamilyMember;
 import com.docnest.exception.ResourceNotFoundException;
 import com.docnest.repository.ClientRepository;
+import com.docnest.repository.DocumentRepository;
 import com.docnest.repository.FamilyMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class FamilyService {
 
     private final FamilyMemberRepository familyMemberRepository;
     private final ClientRepository clientRepository;
+    private final DocumentRepository documentRepository;
     private final ActivityService activityService;
 
     private static final DateTimeFormatter DOB_FMT = DateTimeFormatter.ofPattern("dd MMM yyyy");
@@ -38,6 +40,7 @@ public class FamilyService {
                 .dob(dto.getDob())
                 .gender(dto.getGender())
                 .mobile(dto.getMobile())
+                .email(dto.getEmail())
                 .build();
 
         FamilyMember saved = familyMemberRepository.save(member);
@@ -57,6 +60,7 @@ public class FamilyService {
         member.setDob(dto.getDob());
         member.setGender(dto.getGender());
         member.setMobile(dto.getMobile());
+        member.setEmail(dto.getEmail());
 
         FamilyMember saved = familyMemberRepository.save(member);
         activityService.log("FAMILY_MEMBER_UPDATED",
@@ -119,6 +123,7 @@ public class FamilyService {
     }
 
     private FamilyMemberDTO toDTO(FamilyMember m) {
+        long docCount = documentRepository.countByOwnerTypeAndOwnerId("FAMILY_MEMBER", m.getId());
         return FamilyMemberDTO.builder()
                 .id(m.getId())
                 .clientId(m.getClient().getId())
@@ -127,6 +132,8 @@ public class FamilyService {
                 .dob(m.getDob())
                 .gender(m.getGender())
                 .mobile(m.getMobile())
+                .email(m.getEmail())
+                .documentCount(docCount)
                 .build();
     }
 }

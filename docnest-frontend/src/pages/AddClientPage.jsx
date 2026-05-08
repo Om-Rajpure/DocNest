@@ -58,8 +58,8 @@ export default function AddClientPage() {
         dob: form.dob || null,
       }
       const res = await clientService.create(payload)
-      toast.success('Client profile created successfully!')
-      navigate(`/clients/${res.data.id}`)
+      toast.success('Client profile created successfully! Redirecting to Document Center...')
+      navigate(`/clients/${res.data.id}/documents`)
     } catch (err) {
       console.error('Save client error:', err)
       toast.error(err.message || 'Unable to save client. Please check your connection.')

@@ -18,10 +18,17 @@ public class FileStorageService {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
-    public String storeFile(MultipartFile file, Long clientId) {
+    /**
+     * Stores a file organized by owner type and ID.
+     * e.g. uploads/client_1/uuid.pdf or uploads/family_3/uuid.jpg
+     */
+    public String storeFile(MultipartFile file, String ownerType, Long ownerId) {
         try {
-            Path clientDir = Paths.get(uploadDir, "client_" + clientId).toAbsolutePath().normalize();
-            Files.createDirectories(clientDir);
+            String folderPrefix = ownerType.equalsIgnoreCase("FAMILY_MEMBER") 
+                    ? "family_" + ownerId 
+                    : "client_" + ownerId;
+            Path ownerDir = Paths.get(uploadDir, folderPrefix).toAbsolutePath().normalize();
+            Files.createDirectories(ownerDir);
 
             String originalName = file.getOriginalFilename();
             String extension = "";
@@ -29,13 +36,18 @@ public class FileStorageService {
                 extension = originalName.substring(originalName.lastIndexOf("."));
             }
             String uniqueName = UUID.randomUUID().toString() + extension;
-            Path targetPath = clientDir.resolve(uniqueName);
+            Path targetPath = ownerDir.resolve(uniqueName);
             Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
-            return Paths.get("client_" + clientId, uniqueName).toString().replace("\\", "/");
+            return Paths.get(folderPrefix, uniqueName).toString().replace("\\", "/");
         } catch (IOException e) {
             throw new FileStorageException("Failed to store file: " + e.getMessage());
         }
+    }
+
+    /** Backward-compat overload for existing callers */
+    public String storeFile(MultipartFile file, Long clientId) {
+        return storeFile(file, "CLIENT", clientId);
     }
 
     public void deleteFile(String relativePath) {

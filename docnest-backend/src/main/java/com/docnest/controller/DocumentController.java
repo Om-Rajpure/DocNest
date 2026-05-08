@@ -9,21 +9,22 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/documents")
 @RequiredArgsConstructor
-
 public class DocumentController {
 
     private final DocumentService documentService;
 
     @PostMapping("/upload")
     public ResponseEntity<DocumentDTO> upload(
-            @RequestParam Long clientId,
+            @RequestParam(defaultValue = "CLIENT") String ownerType,
+            @RequestParam Long ownerId,
             @RequestParam(required = false) String documentType,
             @RequestParam("file") MultipartFile file) {
-        return ResponseEntity.ok(documentService.uploadDocument(clientId, documentType, file));
+        return ResponseEntity.ok(documentService.uploadDocument(ownerType, ownerId, documentType, file));
     }
 
     @PutMapping("/replace/{id}")
@@ -39,9 +40,26 @@ public class DocumentController {
         return ResponseEntity.noContent().build();
     }
 
+    /** Get documents by owner (CLIENT or FAMILY_MEMBER) */
+    @GetMapping("/owner/{ownerType}/{ownerId}")
+    public ResponseEntity<List<DocumentDTO>> getByOwner(
+            @PathVariable String ownerType,
+            @PathVariable Long ownerId) {
+        return ResponseEntity.ok(documentService.getDocumentsForOwner(ownerType, ownerId));
+    }
+
+    /** Backward-compat: get by client ID */
     @GetMapping("/client/{clientId}")
     public ResponseEntity<List<DocumentDTO>> getByClient(@PathVariable Long clientId) {
         return ResponseEntity.ok(documentService.getDocumentsForClient(clientId));
+    }
+
+    /** Document completion stats for an owner */
+    @GetMapping("/completion/{ownerType}/{ownerId}")
+    public ResponseEntity<Map<String, Object>> getCompletion(
+            @PathVariable String ownerType,
+            @PathVariable Long ownerId) {
+        return ResponseEntity.ok(documentService.getCompletionStats(ownerType, ownerId));
     }
 
     @GetMapping("/preview/{id}")

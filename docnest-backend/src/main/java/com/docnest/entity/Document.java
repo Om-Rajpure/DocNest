@@ -18,9 +18,11 @@ public class Document {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_id", nullable = false)
-    private Client client;
+    @Column(name = "owner_type", nullable = false, length = 20)
+    private String ownerType; // CLIENT or FAMILY_MEMBER
+
+    @Column(name = "owner_id", nullable = false)
+    private Long ownerId;
 
     @Column(name = "document_type", nullable = false, length = 50)
     private String documentType;

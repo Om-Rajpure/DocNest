@@ -6,16 +6,14 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
-import { MdClose, MdDownload, MdDelete } from 'react-icons/md'
+import { MdClose, MdDownload } from 'react-icons/md'
 import Badge from '../ui/Badge'
-import { docTypeLabel } from '../../utils/formatters'
-
-const API = import.meta.env.VITE_API_URL || 'http://localhost:8080/api'
+import { docTypeLabel, formatDate } from '../../utils/formatters'
 
 export default function DocumentPreviewModal({ open, document: doc, onClose }) {
   if (!doc) return null
 
-  const fileUrl = `${API}/documents/${doc.id}/download`
+  const previewUrl = `/api/documents/preview/${doc.id}`
   const isImage = doc.fileName?.match(/\.(jpg|jpeg|png)$/i)
 
   return (
@@ -38,15 +36,20 @@ export default function DocumentPreviewModal({ open, document: doc, onClose }) {
         </IconButton>
       </DialogTitle>
       <DialogContent sx={{ px: 3, pb: 0 }}>
+        {doc.uploadDate && (
+          <Typography variant="caption" sx={{ display: 'block', mb: 1.5, color: 'var(--text-muted)' }}>
+            Uploaded on {formatDate(doc.uploadDate)}
+          </Typography>
+        )}
         <Box sx={{ 
           background: 'var(--surface-3)', borderRadius: 'var(--radius)', 
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           minHeight: 400, overflow: 'hidden',
         }}>
           {isImage ? (
-            <img src={fileUrl} alt={doc.fileName} style={{ maxWidth: '100%', maxHeight: 500, objectFit: 'contain' }} />
+            <img src={previewUrl} alt={doc.fileName} style={{ maxWidth: '100%', maxHeight: 500, objectFit: 'contain' }} />
           ) : (
-            <iframe src={fileUrl} title={doc.fileName} style={{ width: '100%', height: 500, border: 'none' }} />
+            <iframe src={previewUrl} title={doc.fileName} style={{ width: '100%', height: 500, border: 'none' }} />
           )}
         </Box>
       </DialogContent>
@@ -55,7 +58,7 @@ export default function DocumentPreviewModal({ open, document: doc, onClose }) {
           variant="outlined" 
           startIcon={<MdDownload />} 
           component="a" 
-          href={fileUrl} 
+          href={previewUrl} 
           download
         >
           Download
