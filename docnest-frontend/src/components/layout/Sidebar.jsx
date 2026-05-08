@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { MdDashboard, MdPeople, MdPersonAdd, MdFolder, MdAccountTree,
+import { MdDashboard, MdPeople, MdPersonAdd, MdAccountTree,
          MdUpload, MdHistory, MdSettings, MdMenu, MdClose, MdLogout } from 'react-icons/md'
 import { useAuth } from '../../context/AuthContext'
 import './Sidebar.css'
@@ -11,7 +11,6 @@ const navSections = [
       { to: '/dashboard', icon: <MdDashboard />, label: 'Dashboard', end: true },
       { to: '/clients', icon: <MdPeople />, label: 'Clients', end: true },
       { to: '/clients/add', icon: <MdPersonAdd />, label: 'Add Client' },
-      { to: '/documents', icon: <MdFolder />, label: 'Documents' },
     ],
   },
   {

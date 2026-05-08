@@ -1,18 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ExternalLink, Code2, Heart } from 'lucide-react';
+import { X, Heart } from 'lucide-react';
+import { FaInstagram, FaYoutube, FaGithub, FaGlobe, FaLinkedinIn } from 'react-icons/fa';
 
 const socials = [
-  { name: 'Instagram', url: 'https://www.instagram.com/conceptsin5', color: '#E1306C', icon: '📸' },
-  { name: 'YouTube', url: 'https://www.youtube.com/@conceptsin5', color: '#FF0000', icon: '▶️' },
-  { name: 'GitHub', url: 'https://github.com/Om-Rajpure', color: '#333', icon: '💻' },
-  { name: 'Portfolio', url: 'https://conceptsin5.com/', color: '#2563EB', icon: '🌐' },
-  { name: 'LinkedIn', url: 'https://www.linkedin.com/in/om-rajpure', color: '#0A66C2', icon: '💼' },
+  { icon: FaInstagram, label: 'Instagram', url: 'https://www.instagram.com/conceptsin5' },
+  { icon: FaYoutube, label: 'YouTube', url: 'https://www.youtube.com/@conceptsin5' },
+  { icon: FaGithub, label: 'GitHub', url: 'https://github.com/Om-Rajpure' },
+  { icon: FaGlobe, label: 'Portfolio', url: 'https://conceptsin5.com/' },
+  { icon: FaLinkedinIn, label: 'LinkedIn', url: 'https://www.linkedin.com/in/om-rajpure' },
 ];
 
 export default function DeveloperModal({ isOpen, onClose }) {
   const [avatarUrl, setAvatarUrl] = useState('');
+  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+  const [tooltip, setTooltip] = useState('');
+  const cardRef = useRef(null);
 
+  // Fetch GitHub avatar
   useEffect(() => {
     fetch('https://api.github.com/users/Om-Rajpure')
       .then(r => r.json())
@@ -20,122 +25,132 @@ export default function DeveloperModal({ isOpen, onClose }) {
       .catch(() => {});
   }, []);
 
+  // Escape key handler
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKey = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [isOpen, onClose]);
+
+  // Mouse-follow glow
+  const handleMouseMove = useCallback((e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setMousePos({ x, y });
+  }, []);
+
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="dev-modal-overlay"
+          className="dev-overlay"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.25 }}
           onClick={onClose}
-          style={{
-            position: 'fixed', inset: 0, zIndex: 9999,
-            background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(8px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: 20,
-          }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Developer Profile"
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            ref={cardRef}
+            className="dev-card"
+            initial={{ opacity: 0, scale: 0.88, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
+            exit={{ opacity: 0, scale: 0.92, y: 20 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 380, mass: 0.8 }}
             onClick={e => e.stopPropagation()}
+            onMouseMove={handleMouseMove}
             style={{
-              background: '#fff', borderRadius: 24, width: '100%', maxWidth: 420,
-              boxShadow: '0 25px 80px rgba(15,23,42,0.25)', overflow: 'hidden', position: 'relative',
+              '--glow-x': `${mousePos.x}%`,
+              '--glow-y': `${mousePos.y}%`,
             }}
           >
-            {/* Header gradient */}
-            <div style={{
-              height: 120, background: 'linear-gradient(135deg, #1E40AF 0%, #0EA5E9 50%, #06B6D4 100%)',
-              position: 'relative',
-            }}>
-              <div style={{
-                position: 'absolute', inset: 0,
-                background: 'radial-gradient(circle at 70% 30%, rgba(255,255,255,0.1), transparent 50%)',
-              }} />
-              <button
-                onClick={onClose}
-                style={{
-                  position: 'absolute', top: 12, right: 12, background: 'rgba(255,255,255,0.15)',
-                  border: 'none', borderRadius: 8, padding: 6, color: '#fff', cursor: 'pointer',
-                  backdropFilter: 'blur(4px)', display: 'flex',
-                }}
-              >
-                <X size={18} />
-              </button>
+            {/* Mouse-follow glow */}
+            <div className="dev-glow" />
+
+            {/* Animated gradient bg */}
+            <div className="dev-gradient-bg">
+              <div className="dev-orb dev-orb-1" />
+              <div className="dev-orb dev-orb-2" />
+              <div className="dev-orb dev-orb-3" />
             </div>
 
-            {/* Avatar */}
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: -48 }}>
-              <div style={{
-                width: 96, height: 96, borderRadius: '50%', border: '4px solid #fff',
-                background: avatarUrl ? `url(${avatarUrl}) center/cover` : 'linear-gradient(135deg, #2563EB, #0EA5E9)',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#fff', fontSize: 32, fontWeight: 700, fontFamily: 'var(--font-display)',
-              }}>
-                {!avatarUrl && 'OR'}
+            {/* Close btn */}
+            <button className="dev-close" onClick={onClose} aria-label="Close">
+              <X size={16} strokeWidth={2.5} />
+            </button>
+
+            {/* Profile content */}
+            <div className="dev-content">
+              {/* Avatar */}
+              <div className="dev-avatar-wrap">
+                <div className="dev-avatar-ring" />
+                <div
+                  className="dev-avatar"
+                  style={{
+                    backgroundImage: avatarUrl ? `url(${avatarUrl})` : 'none',
+                  }}
+                >
+                  {!avatarUrl && <span>OR</span>}
+                </div>
+              </div>
+
+              {/* Name */}
+              <h3 className="dev-name">Om Rajpure</h3>
+
+              {/* Role badge */}
+              <div className="dev-role-badge">
+                <span className="dev-role-shimmer" />
+                <span className="dev-role-text">Full Stack Developer</span>
+              </div>
+
+              {/* Bio */}
+              <p className="dev-bio">
+                Building scalable web experiences and intelligent enterprise systems.
+              </p>
+
+              {/* Social dock */}
+              <div className="dev-social-dock">
+                {socials.map((s, i) => (
+                  <div key={i} className="dev-social-wrap"
+                    onMouseEnter={() => setTooltip(s.label)}
+                    onMouseLeave={() => setTooltip('')}
+                  >
+                    {tooltip === s.label && (
+                      <motion.span
+                        className="dev-tooltip"
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        {s.label}
+                      </motion.span>
+                    )}
+                    <a
+                      href={s.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="dev-social-btn"
+                      aria-label={s.label}
+                    >
+                      <s.icon size={18} />
+                    </a>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Info */}
-            <div style={{ textAlign: 'center', padding: '16px 32px 0' }}>
-              <h3 style={{ fontSize: 22, fontWeight: 700, color: '#0F1729', fontFamily: 'var(--font-display)', margin: 0 }}>
-                Om Rajpure
-              </h3>
-              <p style={{
-                fontSize: 13, fontWeight: 600, color: '#2563EB', marginTop: 4,
-                background: '#EFF6FF', display: 'inline-block', padding: '4px 14px', borderRadius: 9999,
-              }}>
-                Full Stack Developer
-              </p>
-              <p style={{ fontSize: 14, color: '#64748B', marginTop: 12, lineHeight: 1.6 }}>
-                Passionate full-stack developer focused on building scalable enterprise applications and AI-powered systems.
-              </p>
-            </div>
-
-            {/* Social links */}
-            <div style={{ padding: '20px 24px 28px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {socials.map((s, i) => (
-                <a
-                  key={i}
-                  href={s.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 12,
-                    padding: '12px 16px', borderRadius: 12,
-                    border: '1.5px solid #E2E8F0', background: '#fff',
-                    textDecoration: 'none', transition: 'all 200ms', cursor: 'pointer',
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.borderColor = s.color;
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = `0 4px 16px ${s.color}20`;
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.borderColor = '#E2E8F0';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
-                >
-                  <span style={{ fontSize: 20 }}>{s.icon}</span>
-                  <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: '#0F1729' }}>{s.name}</span>
-                  <ExternalLink size={14} color="#94A3B8" />
-                </a>
-              ))}
-            </div>
-
             {/* Footer */}
-            <div style={{
-              borderTop: '1px solid #E2E8F0', padding: '14px 24px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-              fontSize: 12, color: '#94A3B8',
-            }}>
-              <span>Built with</span> <Heart size={12} color="#EF4444" fill="#EF4444" /> <span>by Om Rajpure</span>
+            <div className="dev-footer">
+              <span className="dev-footer-text">
+                Built with <Heart size={11} className="dev-heart" /> by Om Rajpure
+              </span>
             </div>
           </motion.div>
         </motion.div>

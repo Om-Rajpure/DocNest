@@ -12,7 +12,6 @@ const PAGE_TITLES = {
   '/dashboard':   'Overview',
   '/clients':     'Clients',
   '/clients/add': 'Add Client',
-  '/documents':   'Documents',
   '/import':      'Excel Import',
   '/activity':    'Activity Logs',
   '/settings':    'Settings',
