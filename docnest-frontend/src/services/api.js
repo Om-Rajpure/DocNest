@@ -36,11 +36,24 @@ API.interceptors.response.use(
       const message = data?.message || data?.error || `Request failed (${status})`;
       return Promise.reject(new Error(message));
     } else if (error.request) {
-      // Handle Render cold starts and network errors
+      // Distinguish CORS errors, timeouts, and general network failures
       if (error.code === 'ECONNABORTED') {
-        return Promise.reject(new Error('Server waking up, please wait...'));
+        return Promise.reject(
+          new Error('Server is waking up. Please wait a moment and try again.')
+        );
       }
-      return Promise.reject(new Error('Connection lost. Please check your internet.'));
+      if (error.code === 'ERR_NETWORK') {
+        return Promise.reject(
+          new Error(
+            'Unable to connect to server. Please try again in a few seconds.'
+          )
+        );
+      }
+      return Promise.reject(
+        new Error(
+          'Unable to connect to server. Please check your internet connection and try again.'
+        )
+      );
     }
     return Promise.reject(new Error(error.message || 'Something went wrong'));
   }

@@ -34,11 +34,13 @@ export function AuthProvider({ children }) {
       setUser({ email: response.email, fullName: response.fullName, role: response.role });
       return response;
     } catch (err) {
+      // The centralized API interceptor already provides user-friendly messages
+      // for network/CORS errors. Only extract server-side messages here.
       const message = err.response?.data?.message
         || err.response?.data?.error
         || err.response?.data
         || err.message
-        || 'Login failed. Please check your credentials.';
+        || 'Unable to connect to server. Please try again in a few seconds.';
       throw new Error(typeof message === 'string' ? message : 'Invalid credentials');
     }
   };
@@ -55,7 +57,7 @@ export function AuthProvider({ children }) {
         || err.response?.data?.error
         || err.response?.data
         || err.message
-        || 'Registration failed. Please try again.';
+        || 'Unable to connect to server. Please try again in a few seconds.';
       throw new Error(typeof message === 'string' ? message : 'Registration failed');
     }
   };

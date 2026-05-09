@@ -59,7 +59,7 @@ export default function LandingFooter() {
           </div>
 
           <div className="footer-bottom">
-            <span>© 2024 DocNest. All rights reserved.</span>
+            <span>© 2026 DocNest. All rights reserved.</span>
             <button
               onClick={() => setDevOpen(true)}
               className="footer-dev-badge"

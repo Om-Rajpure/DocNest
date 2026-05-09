@@ -35,7 +35,7 @@ const steps = [
 function StepVisual({ gradient, emoji }) {
   return (
     <div style={{
-      width: '100%', height: 280, borderRadius: 16, background: gradient,
+      width: '100%', aspectRatio: '16 / 10', maxHeight: 280, borderRadius: 16, background: gradient,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       boxShadow: '0 8px 32px rgba(0,0,0,0.12)', position: 'relative', overflow: 'hidden',
     }}>
